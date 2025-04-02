@@ -1,22 +1,46 @@
 import wx
 
 
-def print_hi(name):
-    print(f'Hi, {name}')
+class AudioSettingsFrame(wx.Frame):
+    def __init__(self):
+        super().__init__(None, title="Audio Settings", size=(400, 350))
 
-    # Next, create an application object.
-    app = wx.App()
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
 
-    # Then a frame.
-    frm = wx.Frame(None, title="Hello World")
+        self.controls = {}
 
-    # Show it.
-    frm.Show()
+        settings = ["Surround", "Crystalizer", "Bass", "Smart Volume", "Dialog Plus"]
 
-    # Start the event loop.
+        for setting in settings:
+            hbox = wx.BoxSizer(wx.HORIZONTAL)
+            label = wx.StaticText(panel, label=setting)
+            slider = wx.Slider(panel, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
+            toggle = wx.ToggleButton(panel, label="Enable")
+
+            slider.Enable(False)  # Initially disabled
+
+            toggle.Bind(wx.EVT_TOGGLEBUTTON, lambda evt, s=slider: self.on_toggle(evt, s))
+
+            hbox.Add(label, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+            hbox.Add(slider, proportion=2, flag=wx.ALL | wx.EXPAND, border=5)
+            hbox.Add(toggle, proportion=1, flag=wx.ALL, border=5)
+
+            self.controls[setting] = (slider, toggle)
+            vbox.Add(hbox, flag=wx.EXPAND)
+
+        panel.SetSizer(vbox)
+        self.Centre()
+        self.Show()
+
+    def on_toggle(self, event, slider):
+        button = event.GetEventObject()
+        enabled = button.GetValue()
+        slider.Enable(enabled)
+        button.SetLabel("Disable" if enabled else "Enable")
+
+
+if __name__ == "__main__":
+    app = wx.App(False)
+    frame = AudioSettingsFrame()
     app.MainLoop()
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
