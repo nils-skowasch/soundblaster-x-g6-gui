@@ -1,5 +1,8 @@
 import wx
 
+FRIEND_SLIDER = 'slider'
+FRIEND_GEARS = 'gears'
+
 
 class MixerTab:
 
@@ -34,11 +37,14 @@ class MixerTab:
         hbox = wx.BoxSizer(wx.HORIZONTAL)
 
         lbl_component = wx.StaticText(panel, label=label)
-        chk_component = wx.CheckBox(panel, label="Active / Muted")
+        chk_component = wx.CheckBox(panel, label="Active")
+        chk_component.SetValue(True)
+        chk_component.Bind(wx.EVT_CHECKBOX, self.__on_checkbox_button)
         sld_component = wx.Slider(panel, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
         btn_gears = wx.Button(panel, label="⚙")
-
         btn_gears.Bind(wx.EVT_BUTTON, self.__on_gears_button)
+
+        chk_component.friends = {FRIEND_SLIDER: sld_component, FRIEND_GEARS: btn_gears}
 
         hbox.Add(lbl_component, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
         hbox.Add(chk_component, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
@@ -61,3 +67,10 @@ class MixerTab:
 
         dialog.SetSizer(vbox)
         dialog.ShowModal()
+
+    @staticmethod
+    def __on_checkbox_button(event):
+        checkbox = event.EventObject
+        checkbox.Label = 'Active' if checkbox.Value else 'Muted'
+        checkbox.friends[FRIEND_SLIDER].Enable(checkbox.Value)
+        checkbox.friends[FRIEND_GEARS].Enable(checkbox.Value)

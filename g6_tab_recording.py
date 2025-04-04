@@ -3,6 +3,14 @@ import wx
 
 class RecordingTab:
 
+    def __init__(self):
+        self.__tgl_voice_clarity = None
+        self.__chk_noise_reduction = None
+        self.__sld_noise_reduction = None
+        self.__chk_echo_cancellation = None
+        self.__chk_smart_volume = None
+        self.__chk_mic_eq = None
+
     def create(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -38,24 +46,22 @@ class RecordingTab:
         vbox.Add(playback_checkbox, 0, wx.ALL, 5)
 
         # voice clarity
-        chk_noise_reduction = wx.CheckBox(panel, label="Noise reduction")
-        sld_noise_reduction = wx.Slider(panel, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
-        chk_echo_cancellation = wx.CheckBox(panel, label="Acoustic Echo Cancellation")
-        chk_smart_volume = wx.CheckBox(panel, label="Smart Volume")
-        check_mic_eq = wx.CheckBox(panel, label="Mic-EQ")
+        self.__tgl_voice_clarity = wx.ToggleButton(panel, label="Voice clarity")
+        self.__tgl_voice_clarity.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.__handle_voice_clarity_enabled())
+        vbox.Add(self.__tgl_voice_clarity, 0, wx.ALL, 5)
 
-        ## voice clarity > toggle
-        tgl_voice_clarity = wx.ToggleButton(panel, label="Voice clarity")
-        tgl_voice_clarity.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: self.__toggle_group(evt, [chk_noise_reduction,
-                                                                                          sld_noise_reduction,
-                                                                                          chk_echo_cancellation,
-                                                                                          chk_smart_volume,
-                                                                                          check_mic_eq]))
-        vbox.Add(tgl_voice_clarity, 0, wx.ALL, 5)
+        self.__chk_noise_reduction = wx.CheckBox(panel, label="Noise reduction")
+        self.__chk_noise_reduction.Bind(wx.EVT_CHECKBOX,
+                                        lambda evt: self.__handle_voice_clarity_sld_noise_reduction_enabled())
+        self.__sld_noise_reduction = wx.Slider(panel, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
+        self.__chk_echo_cancellation = wx.CheckBox(panel, label="Acoustic Echo Cancellation")
+        self.__chk_smart_volume = wx.CheckBox(panel, label="Smart Volume")
+        self.__chk_mic_eq = wx.CheckBox(panel, label="Mic-EQ")
 
-        ## voice clarity > vbox
+        # voice clarity > group
         vbox_voice_clarity = wx.StaticBoxSizer(wx.VERTICAL, panel, "Voice clarity options")
-        for widget in [chk_noise_reduction, sld_noise_reduction, chk_echo_cancellation, chk_smart_volume, check_mic_eq]:
+        for widget in [self.__chk_noise_reduction, self.__sld_noise_reduction, self.__chk_echo_cancellation,
+                       self.__chk_smart_volume, self.__chk_mic_eq]:
             widget.Enable(False)
             vbox_voice_clarity.Add(widget, 0, wx.ALL | wx.EXPAND, 5)
         vbox.Add(vbox_voice_clarity, 0, wx.ALL | wx.EXPAND, 5)
@@ -66,12 +72,12 @@ class RecordingTab:
             "Elf", "Dwarf", "Intruder", "Ur", "Orc", "Marine", "Hamster", "Roboter"
         ]
 
-        ## voice morph > toggle
+        # voice morph > toggle
         tlg_voice_morph = wx.ToggleButton(panel, label="Voice morph")
         tlg_voice_morph.Bind(wx.EVT_TOGGLEBUTTON, lambda evt: cmb_voice_morph.Enable(tlg_voice_morph.GetValue()))
         vbox.Add(tlg_voice_morph, 0, wx.ALL, 5)
 
-        ## voice morph > combo
+        # voice morph > combo
         vbox_voice_morph = wx.StaticBoxSizer(wx.VERTICAL, panel, "Voice morph type")
         cmb_voice_morph = wx.ComboBox(panel, choices=morph_choices, style=wx.CB_READONLY)
         cmb_voice_morph.Enable(False)
@@ -106,3 +112,14 @@ class RecordingTab:
         state = event.GetEventObject().GetValue()
         for widget in widgets:
             widget.Enable(state)
+
+    def __handle_voice_clarity_enabled(self):
+        voice_clarity_enabled = self.__tgl_voice_clarity.GetValue()
+        self.__chk_noise_reduction.Enable(voice_clarity_enabled)
+        self.__handle_voice_clarity_sld_noise_reduction_enabled()
+        self.__chk_echo_cancellation.Enable(voice_clarity_enabled)
+        self.__chk_smart_volume.Enable(voice_clarity_enabled)
+        self.__chk_mic_eq.Enable(voice_clarity_enabled)
+
+    def __handle_voice_clarity_sld_noise_reduction_enabled(self):
+        self.__sld_noise_reduction.Enable(self.__tgl_voice_clarity.GetValue() and self.__chk_noise_reduction.GetValue())
