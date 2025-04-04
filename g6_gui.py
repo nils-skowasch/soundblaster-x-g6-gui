@@ -4,6 +4,7 @@ from g6_tab_playback import PlaybackTab
 from g6_tab_recording import RecordingTab
 from g6_tab_decoder import DecoderTab
 from g6_tab_mixer import MixerTab
+from g6_tab_lighting import LightingTab
 
 
 class AudioSettingsFrame(wx.Frame):
@@ -19,6 +20,8 @@ class AudioSettingsFrame(wx.Frame):
         self.notebook.AddPage(RecordingTab().create(self.notebook), "Recording")
         self.notebook.AddPage(DecoderTab().create(self.notebook), "Decoder")
         self.notebook.AddPage(MixerTab(self).create(self.notebook), "Mixer")
+
+        self.notebook.AddPage(LightingTab().create(self.notebook), "Lighting")
 
     def open(self):
         self.Centre()
