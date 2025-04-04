@@ -2,9 +2,9 @@ import wx
 
 class AudioSettingsFrame(wx.Frame):
     def __init__(self):
-        super().__init__(None, title="Audio Settings", size=(600, 600))
+        super().__init__(None, title="Audio Settings", size=(1024, 768))
 
-        notebook = wx.Notebook(self)
+        notebook = wx.Notebook(self, size=(800, 600))
 
         self.create_sbx_profile_tab(notebook)
         self.create_playback_tab(notebook)
@@ -100,18 +100,19 @@ class AudioSettingsFrame(wx.Frame):
 
     def create_recording_tab(self, notebook):
         panel = wx.Panel(notebook)
-        tabbook = wx.Notebook(panel)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        panel.SetSizer(vbox)
 
-        mic_panel = self.create_microphone_tab(tabbook)
-        other_input_panel = self.create_other_input_tab(tabbook)
+        tab_notebook = wx.Notebook(panel, size=(300, 200))
 
-        tabbook.AddPage(mic_panel, "Microphone")
-        tabbook.AddPage(other_input_panel, "Other Input")
+        mic_panel = self.create_microphone_tab(tab_notebook)
+        tab_notebook.AddPage(mic_panel, "Microphone")
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(tabbook, 1, wx.EXPAND | wx.ALL, 5)
-        panel.SetSizer(sizer)
+        other_input_panel = self.create_other_input_tab(tab_notebook)
+        tab_notebook.AddPage(other_input_panel, "Other Input")
+
         notebook.AddPage(panel, "Recording")
+        vbox.Add(tab_notebook, 1, wx.EXPAND | wx.ALL, 5)
 
     def create_decoder_tab(self, notebook):
         panel = wx.Panel(notebook)
@@ -183,8 +184,8 @@ class AudioSettingsFrame(wx.Frame):
         dialog.SetSizer(vbox)
         dialog.ShowModal()
 
-    def create_microphone_tab(self, parent):
-        panel = wx.Panel(parent)
+    def create_microphone_tab(self, tab_notebook):
+        panel = wx.Panel(tab_notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         mic_volume = wx.Slider(panel, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
