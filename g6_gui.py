@@ -1,21 +1,25 @@
 import wx
 
 class AudioSettingsFrame(wx.Frame):
+
     def __init__(self):
         super().__init__(None, title="Audio Settings", size=(1024, 768))
 
-        notebook = wx.Notebook(self, size=(800, 600))
+        self.notebook = wx.Notebook(self, size=(800, 600))
 
-        self.create_sbx_profile_tab(notebook)
-        self.create_playback_tab(notebook)
-        self.create_recording_tab(notebook)
-        self.create_decoder_tab(notebook)
-        self.create_mixer_tab(notebook)  # New Mixer tab
+        self.notebook.AddPage(self.__create_sbx_profile_tab(self.notebook), 'SBX-Profile')
+        self.notebook.AddPage(self.__create_playback_tab(self.notebook), "Playback")
 
+        self.notebook.AddPage(self.__create_recording_tab(self.notebook), "Recording")
+        self.notebook.AddPage(self.__create_decoder_tab(self.notebook), "Decoder")
+        self.notebook.AddPage(self.__create_mixer_tab(self.notebook), "Mixer")
+
+
+    def open(self):
         self.Centre()
         self.Show()
 
-    def create_sbx_profile_tab(self, notebook):
+    def __create_sbx_profile_tab(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -39,9 +43,9 @@ class AudioSettingsFrame(wx.Frame):
             vbox.Add(hbox, flag=wx.EXPAND)
 
         panel.SetSizer(vbox)
-        notebook.AddPage(panel, "SBX-Profile")
+        return panel
 
-    def create_playback_tab(self, notebook):
+    def __create_playback_tab(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -96,9 +100,9 @@ class AudioSettingsFrame(wx.Frame):
         vbox.Add(test_button, flag=wx.ALL | wx.EXPAND, border=5)
 
         panel.SetSizer(vbox)
-        notebook.AddPage(panel, "Playback")
+        return panel
 
-    def create_recording_tab(self, notebook):
+    def __create_recording_tab(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
         panel.SetSizer(vbox)
@@ -111,10 +115,10 @@ class AudioSettingsFrame(wx.Frame):
         other_input_panel = self.create_other_input_tab(tab_notebook)
         tab_notebook.AddPage(other_input_panel, "Other Input")
 
-        notebook.AddPage(panel, "Recording")
         vbox.Add(tab_notebook, 1, wx.EXPAND | wx.ALL, 5)
+        return panel
 
-    def create_decoder_tab(self, notebook):
+    def __create_decoder_tab(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -127,9 +131,9 @@ class AudioSettingsFrame(wx.Frame):
         vbox.Add(night_radio, 0, wx.ALL, 5)
 
         panel.SetSizer(vbox)
-        notebook.AddPage(panel, "Decoder")
+        return panel
 
-    def create_mixer_tab(self, notebook):
+    def __create_mixer_tab(self, notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -140,7 +144,7 @@ class AudioSettingsFrame(wx.Frame):
         self.create_mixer_slider_group(panel, "Monitoring", ["Line-In", "External Microphone", "SPDIF-In"])
         self.create_mixer_slider_group(panel, "Recording", ["External Mic", "Line In", "SPDIF-In", "Why U Hear"])
 
-        notebook.AddPage(panel, "Mixer")
+        return panel
 
     def create_mixer_slider_group(self, panel, group_name, george_labels):
         group_box = wx.StaticBox(panel, label=group_name)
@@ -264,4 +268,5 @@ class AudioSettingsFrame(wx.Frame):
 if __name__ == "__main__":
     app = wx.App(False)
     frame = AudioSettingsFrame()
+    frame.open()
     app.MainLoop()
