@@ -18,7 +18,7 @@ class MixerTab:
         # Define groups and george components
         self.__create_mixer_slider_group(panel, "Playback", ["Speakers"])
         self.__create_mixer_slider_group(panel, "Monitoring", ["Line-In", "External Microphone", "SPDIF-In"])
-        self.__create_mixer_slider_group(panel, "Recording", ["External Mic", "Line In", "SPDIF-In", "Why U Hear"])
+        self.__create_mixer_slider_group(panel, "Recording", ["External Mic", "Line In", "SPDIF-In", "What U Hear"])
 
         return panel
 
