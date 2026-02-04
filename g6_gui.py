@@ -10,7 +10,7 @@ from g6_tab_lighting import LightingTab
 class AudioSettingsFrame(wx.Frame):
 
     def __init__(self):
-        super().__init__(None, title="Audio Settings", size=wx.Size(1024, 768))
+        super().__init__(None, title="Audio Settings", size=wx.Size(840, 630))
 
         # create panel with vertical box sizer
         self.panel_main = wx.Panel(self)
