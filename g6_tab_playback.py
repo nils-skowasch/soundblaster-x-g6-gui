@@ -22,20 +22,13 @@ class PlaybackTab:
 
         # Filter ComboBox
         filter_choices = [
-            "Schneller Abrollvorgang - Minimale Phase",
-            "Langsames Abrollen - Minimale Phase",
-            "Schneller Abrollvorgang - Lineare Phase",
-            "Langsames Abrollen - Lineare Phase"
+            "Fast Roll-Off - Minimum Phase",
+            "Slow Roll-Off - Minimum Phase",
+            "Fast Roll-Off - Linear Phase",
+            "Slow Roll-Off - Linear Phase"
         ]
         cmb_filter = wx.ComboBox(panel, choices=filter_choices, style=wx.CB_READONLY)
         cmb_filter.SetSelection(0)
-
-        # Audio Quality ComboBox
-        bit_depths = ["16 Bit", "24 Bit", "32 Bit"]
-        sample_rates = ["44 kHz", "48 kHz", "88 kHz", "96 kHz"]
-        audio_quality_choices = [f"{bit} {rate}" for bit in bit_depths for rate in sample_rates]
-        cmb_audio_quality = wx.ComboBox(panel, choices=audio_quality_choices, style=wx.CB_READONLY)
-        cmb_audio_quality.SetSelection(0)
 
         # Test button
         btn_test = wx.Button(panel, label="Test")
@@ -46,7 +39,6 @@ class PlaybackTab:
         vbox.Add(tgl_directmode, flag=wx.ALL | wx.EXPAND, border=5)
         vbox.Add(tgl_spdif, flag=wx.ALL | wx.EXPAND, border=5)
         vbox.Add(cmb_filter, flag=wx.ALL | wx.EXPAND, border=5)
-        vbox.Add(cmb_audio_quality, flag=wx.ALL | wx.EXPAND, border=5)
         vbox.Add(btn_test, flag=wx.ALL | wx.EXPAND, border=5)
 
         panel.SetSizer(vbox)

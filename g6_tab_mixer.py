@@ -54,7 +54,7 @@ class MixerTab:
         return hbox
 
     def __on_gears_button(self, event):
-        dialog = wx.Dialog(self.frame, title="Gears Settings", size=(300, 200))
+        dialog = wx.Dialog(self.frame, title="Gears Settings", size=wx.Size(300, 200))
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         l_slider = wx.Slider(dialog, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
