@@ -62,10 +62,10 @@ class AudioSettingsFrame(wx.Frame):
             self.__g6_api.release_audio_interface()
 
         def handle_btn_apply(event):
-            self.__g6_api.playback_mute(mute=False)
+            self.__g6_api.playback_mute(mute=True)
 
-        def handle_btn_reconfigure(event):
-            self.__g6_api.reconfigure_alsa()
+        def handle_btn_reload_alsa_and_pipewire(event):
+            self.__g6_api.reload_alsa_and_pipewire()
 
         # create footer panel
         panel_footer = wx.Panel(parent)
@@ -99,10 +99,11 @@ class AudioSettingsFrame(wx.Frame):
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
         btn_release.Bind(wx.EVT_BUTTON, lambda event: handle_btn_release(event))
 
-        btn_reconfigure = wx.Button(panel_footer, label="Reconfigure ALSA")
+        btn_reload_alsa_and_pipewire = wx.Button(panel_footer, label="Reload ALSA and PipeWire")
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
-        hbox_footer.Add(btn_reconfigure, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(btn_reload_alsa_and_pipewire, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        btn_reload_alsa_and_pipewire.Bind(wx.EVT_BUTTON, lambda event: handle_btn_reload_alsa_and_pipewire(event))
 
         return panel_footer
 
