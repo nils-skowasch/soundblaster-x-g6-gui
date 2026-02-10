@@ -1,10 +1,10 @@
 import wx
-from g6_tab_sbx import SbxTab
-from g6_tab_playback import PlaybackTab
-from g6_tab_recording import RecordingTab
-from g6_tab_decoder import DecoderTab
-from g6_tab_mixer import MixerTab
-from g6_tab_lighting import LightingTab
+from src.g6_gui.g6_tab_sbx import SbxTab
+from src.g6_gui.g6_tab_playback import PlaybackTab
+from src.g6_gui.g6_tab_recording import RecordingTab
+from src.g6_gui.g6_tab_decoder import DecoderTab
+from src.g6_gui.g6_tab_mixer import MixerTab
+from src.g6_gui.g6_tab_lighting import LightingTab
 
 
 class AudioSettingsFrame(wx.Frame):
@@ -65,7 +65,7 @@ class AudioSettingsFrame(wx.Frame):
         return panel_footer
 
 
-if __name__ == "__main__":
+def main():
     app = wx.App(False)
     frame = AudioSettingsFrame()
     frame.open()
