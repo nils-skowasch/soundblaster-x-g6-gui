@@ -1,11 +1,12 @@
 import wx
+
+from g6_cli import G6Api
 from src.g6_gui.g6_tab_sbx import SbxTab
 from src.g6_gui.g6_tab_playback import PlaybackTab
 from src.g6_gui.g6_tab_recording import RecordingTab
 from src.g6_gui.g6_tab_decoder import DecoderTab
 from src.g6_gui.g6_tab_mixer import MixerTab
 from src.g6_gui.g6_tab_lighting import LightingTab
-
 
 class AudioSettingsFrame(wx.Frame):
 
@@ -27,6 +28,9 @@ class AudioSettingsFrame(wx.Frame):
         self.panel_footer = self.__create_footer(self.panel_main)
         self.vbox_main.Add(self.panel_footer, flag=wx.EXPAND, proportion=0, border=5)
 
+        # initialize variables
+        self.__g6_api : G6Api | None = None
+
     def open(self):
         self.Centre()
         self.Show()
@@ -47,8 +51,22 @@ class AudioSettingsFrame(wx.Frame):
 
         return notebook
 
-    @staticmethod
-    def __create_footer(parent: wx.Panel) -> wx.Panel:
+    def __create_footer(self, parent: wx.Panel) -> wx.Panel:
+        def handle_btn_lookup(event):
+            self.__g6_api = G6Api(dry_run=False)
+
+        def handle_btn_claim(event):
+            self.__g6_api.claim_audio_interface()
+
+        def handle_btn_release(event):
+            self.__g6_api.release_audio_interface()
+
+        def handle_btn_apply(event):
+            self.__g6_api.playback_mute(mute=False)
+
+        def handle_btn_reconfigure(event):
+            self.__g6_api.reconfigure_alsa()
+
         # create footer panel
         panel_footer = wx.Panel(parent)
 
@@ -57,9 +75,33 @@ class AudioSettingsFrame(wx.Frame):
         panel_footer.SetSizer(hbox_footer)
 
         # add components to footer
+        btn_lookup = wx.Button(panel_footer, label="Lookup G6")
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        hbox_footer.Add(btn_lookup, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        btn_lookup.Bind(wx.EVT_BUTTON, lambda event: handle_btn_lookup(event))
+
+        btn_claim = wx.Button(panel_footer, label="Claim Audio Interface")
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        hbox_footer.Add(btn_claim, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        btn_claim.Bind(wx.EVT_BUTTON, lambda event: handle_btn_claim(event))
+
         btn_apply = wx.Button(panel_footer, label="Apply")
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
         hbox_footer.Add(btn_apply, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        btn_apply.Bind(wx.EVT_BUTTON, lambda event: handle_btn_apply(event))
+
+        btn_release = wx.Button(panel_footer, label="Release Audio Interface")
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        hbox_footer.Add(btn_release, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        btn_release.Bind(wx.EVT_BUTTON, lambda event: handle_btn_release(event))
+
+        btn_reconfigure = wx.Button(panel_footer, label="Reconfigure ALSA")
+        hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
+        hbox_footer.Add(btn_reconfigure, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
 
         return panel_footer
