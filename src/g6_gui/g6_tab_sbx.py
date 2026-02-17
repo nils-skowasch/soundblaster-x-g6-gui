@@ -1,10 +1,190 @@
 from collections.abc import Callable
+
 import wx
 
 from g6_cli import G6Api, AudioFeature, SmartVolumeSpecialHex
+from g6_gui.g6_models import AudioComponent, AudioComponentSmartVolume
 
 
-class SbxTab:
+class Model:
+    def __init__(self):
+        self.__view: View | None = None
+        self.__surround = AudioComponent()
+        self.__crystalizer = AudioComponent()
+        self.__bass = AudioComponent()
+        self.__smart_volume = AudioComponentSmartVolume()
+        self.__dialog_plus = AudioComponent()
+
+    def bind(self, view: "View"):
+        self.__view = view
+
+    # --- surround ---
+
+    def is_surround_available(self) -> bool:
+        return self.__surround.is_available()
+
+    def set_surround_available(self, available: bool):
+        self.__surround.set_available(available)
+        self.__handle_surround_enabled()
+
+    def is_surround_active(self) -> bool:
+        return self.__surround.is_active()
+
+    def set_surround_active(self, active: bool):
+        self.__surround.set_active(active)
+        self.__handle_surround_enabled()
+
+    def get_surround_value(self) -> int:
+        return self.__surround.get_value()
+
+    def set_surround_value(self, value: int):
+        self.__surround.set_value(value)
+        self.__view.set_surround_slider_value(value)
+
+    def __handle_surround_enabled(self):
+        available = self.__surround.is_available()
+        active = self.__surround.is_active()
+        active_and_available = available and active
+        self.__view.set_surround_toggle_enabled(available)
+        self.__view.set_surround_toggle_value(active)
+        self.__view.set_surround_slider_enabled(active_and_available)
+        self.__view.set_surround_special_buttons_enabled(active_and_available)
+
+    # --- crystalizer ---
+
+    def is_crystalizer_available(self) -> bool:
+        return self.__crystalizer.is_available()
+
+    def set_crystalizer_available(self, available: bool):
+        self.__crystalizer.set_available(available)
+        self.__handle_crystalizer_enabled()
+
+    def is_crystalizer_active(self) -> bool:
+        return self.__crystalizer.is_active()
+
+    def set_crystalizer_active(self, active: bool):
+        self.__crystalizer.set_active(active)
+        self.__handle_crystalizer_enabled()
+
+    def get_crystalizer_value(self) -> int:
+        return self.__crystalizer.get_value()
+
+    def set_crystalizer_value(self, value: int):
+        self.__crystalizer.set_value(value)
+        self.__view.set_crystalizer_slider_value(value)
+
+    def __handle_crystalizer_enabled(self):
+        available = self.__crystalizer.is_available()
+        active = self.__crystalizer.is_active()
+        active_and_available = available and active
+        self.__view.set_crystalizer_toggle_enabled(available)
+        self.__view.set_crystalizer_toggle_value(active)
+        self.__view.set_crystalizer_slider_enabled(active_and_available)
+        self.__view.set_crystalizer_special_buttons_enabled(active_and_available)
+
+    # --- bass ---
+
+    def is_bass_available(self) -> bool:
+        return self.__bass.is_available()
+
+    def set_bass_available(self, available: bool):
+        self.__bass.set_available(available)
+        self.__handle_bass_enabled()
+
+    def is_bass_active(self) -> bool:
+        return self.__bass.is_active()
+
+    def set_bass_active(self, active: bool):
+        self.__bass.set_active(active)
+        self.__handle_bass_enabled()
+
+    def get_bass_value(self) -> int:
+        return self.__bass.get_value()
+
+    def set_bass_value(self, value: int):
+        self.__bass.set_value(value)
+        self.__view.set_bass_slider_value(value)
+
+    def __handle_bass_enabled(self):
+        available = self.__bass.is_available()
+        active = self.__bass.is_active()
+        active_and_available = available and active
+        self.__view.set_bass_toggle_enabled(available)
+        self.__view.set_bass_toggle_value(active)
+        self.__view.set_bass_slider_enabled(active_and_available)
+        self.__view.set_bass_special_buttons_enabled(active_and_available)
+
+    # --- smart volume ---
+    def is_smart_volume_available(self) -> bool:
+        return self.__smart_volume.is_available()
+
+    def set_smart_volume_available(self, available: bool):
+        self.__smart_volume.set_available(available)
+        self.__handle_smart_volume_enabled()
+
+    def is_smart_volume_active(self) -> bool:
+        return self.__smart_volume.is_active()
+
+    def set_smart_volume_active(self, active: bool):
+        self.__smart_volume.set_active(active)
+        self.__handle_smart_volume_enabled()
+
+    def get_smart_volume_value(self) -> int:
+        return self.__smart_volume.get_value()
+
+    def set_smart_volume_value(self, value: int):
+        self.__smart_volume.set_value(value)
+        self.__view.set_smart_volume_slider_value(value)
+
+    def set_smart_volume_night_mode(self):
+        self.__smart_volume.set_night_mode()
+
+    def set_smart_volume_loud_mode(self):
+        self.__smart_volume.set_loud_mode()
+
+    def __handle_smart_volume_enabled(self):
+        available = self.__smart_volume.is_available()
+        active = self.__smart_volume.is_active()
+        active_and_available = available and active
+        self.__view.set_smart_volume_toggle_enabled(available)
+        self.__view.set_smart_volume_toggle_value(active)
+        self.__view.set_smart_volume_slider_enabled(active_and_available)
+        self.__view.set_smart_volume_special_buttons_enabled(active_and_available)
+
+    # --- dialog plus ---
+
+    def is_dialog_plus_available(self) -> bool:
+        return self.__dialog_plus.is_available()
+
+    def set_dialog_plus_available(self, available: bool):
+        self.__dialog_plus.set_available(available)
+        self.__handle_dialog_plus_enabled()
+
+    def is_dialog_plus_active(self) -> bool:
+        return self.__dialog_plus.is_active()
+
+    def set_dialog_plus_active(self, active: bool):
+        self.__dialog_plus.set_active(active)
+        self.__handle_dialog_plus_enabled()
+
+    def get_dialog_plus_value(self) -> int:
+        return self.__dialog_plus.get_value()
+
+    def set_dialog_plus_value(self, value: int):
+        self.__dialog_plus.set_value(value)
+        self.__view.set_dialog_plus_slider_value(value)
+
+    def __handle_dialog_plus_enabled(self):
+        available = self.__dialog_plus.is_available()
+        active = self.__dialog_plus.is_active()
+        active_and_available = available and active
+        self.__view.set_dialog_plus_toggle_enabled(available)
+        self.__view.set_dialog_plus_toggle_value(active)
+        self.__view.set_dialog_plus_slider_enabled(active_and_available)
+        self.__view.set_dialog_plus_special_buttons_enabled(active_and_available)
+
+
+class View:
     class SliderComposite(wx.BoxSizer):
         def __init__(self, parent: wx.Panel, label: str):
             super().__init__(wx.HORIZONTAL)
@@ -56,25 +236,35 @@ class SbxTab:
             self.__toggle.Bind(wx.EVT_TOGGLEBUTTON, handler)
 
         def bind_slider_event(self, handler: Callable[[wx.CommandEvent], None]) -> None:
-            self.__slider.Bind(wx.EVT_SCROLL, handler)
+            self.__slider.Bind(wx.EVT_SCROLL_CHANGED, handler)
 
         def update_availability(self, g6_api: G6Api | None):
-            toggle_enabled = self.is_toggle_enabled()
+            toggle_value = self.get_toggle_value()
 
             slider_available = False
             toggle_available = False
             if g6_api is not None:
-                slider_available = toggle_enabled and g6_api.sbx_slider_available()
+                slider_available = toggle_value and g6_api.sbx_slider_available()
                 toggle_available = g6_api.sbx_toggle_available()
 
             self.__slider.Enable(slider_available)
             self.__toggle.Enable(toggle_available)
 
-        def is_toggle_enabled(self) -> bool:
+        def get_toggle_value(self) -> bool:
             return self.__toggle.GetValue()
 
         def set_toggle_value(self, value: bool):
             self.__toggle.SetValue(value)
+            self.__toggle.SetLabel("Enabled" if value else "Disabled")
+
+        def is_toggle_enabled(self) -> bool:
+            return self.__toggle.IsEnabled()
+
+        def set_toggle_enabled(self, enabled: bool):
+            self.__toggle.Enable(enabled)
+
+        def is_slider_enabled(self) -> bool:
+            return self.__slider.IsEnabled()
 
         def set_slider_enabled(self, enabled: bool):
             self.__slider.Enable(enabled)
@@ -85,6 +275,9 @@ class SbxTab:
 
         def get_slider_value(self) -> int:
             return self.__slider.Value
+
+        def set_slider_value(self, value: int):
+            self.__slider.SetValue(value)
 
     class SmartVolumeSpecialComposite(SliderComposite):
         def __init__(self, parent: wx.Panel, label: str):
@@ -103,11 +296,11 @@ class SbxTab:
 
         def update_availability(self, g6_api: G6Api | None):
             super().update_availability(g6_api=g6_api)
-            toggle_enabled = self.is_toggle_enabled()
+            toggle_value = self.get_toggle_value()
 
             special_button_available = False
             if g6_api is not None:
-                special_button_available = toggle_enabled and g6_api.sbx_smart_volume_special_available()
+                special_button_available = toggle_value and g6_api.sbx_smart_volume_special_available()
 
             self.__night_button.Enable(special_button_available)
             self.__loud_button.Enable(special_button_available)
@@ -119,12 +312,16 @@ class SbxTab:
             self.__loud_button.Bind(wx.EVT_BUTTON, handler)
 
     def __init__(self):
+        self.__controller: Controller | None = None
         self.__g6_api: None | G6Api = None
         self.__cmp_surround = None
         self.__cmp_crystalizer = None
         self.__cmp_bass = None
         self.__cmp_smart_volume = None
         self.__cmp_dialog_plus = None
+
+    def bind(self, controller: "Controller"):
+        self.__controller = controller
 
     def create(self, notebook: wx.Notebook) -> wx.Panel:
         panel = wx.Panel(notebook)
@@ -134,52 +331,49 @@ class SbxTab:
         flags = wx.ALL | wx.EXPAND
 
         ## surround
-        self.__cmp_surround = SbxTab.SliderComposite(panel, "Surround")
-        self.__cmp_surround.bind_toggle_event(lambda event: self.on_toggle(slider_composite=self.__cmp_surround,
-                                                                           audio_feature=AudioFeature.SURROUND_TOGGLE,
-                                                                           event=event))
-        self.__cmp_surround.bind_slider_event(lambda event: self.on_slide(slider_composite=self.__cmp_surround,
-                                                                          audio_feature=AudioFeature.SURROUND_SLIDER))
+        self.__cmp_surround = View.SliderComposite(panel, "Surround")
+        self.__cmp_surround.bind_toggle_event(
+            lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.SURROUND_TOGGLE,
+                                                      event=event))
+        self.__cmp_surround.bind_slider_event(
+            lambda event: self.__controller.on_slide(audio_feature=AudioFeature.SURROUND_SLIDER, event=event))
         vbox.Add(self.__cmp_surround, flag=flags, border=5)
 
         ## crystalizer
-        self.__cmp_crystalizer = SbxTab.SliderComposite(panel, "Crystalizer")
-        self.__cmp_crystalizer.bind_toggle_event(lambda event: self.on_toggle(slider_composite=self.__cmp_crystalizer,
-                                                                              audio_feature=AudioFeature.CRYSTALIZER_TOGGLE,
-                                                                              event=event))
-        self.__cmp_crystalizer.bind_slider_event(lambda event: self.on_slide(slider_composite=self.__cmp_crystalizer,
-                                                                             audio_feature=AudioFeature.CRYSTALIZER_SLIDER))
+        self.__cmp_crystalizer = View.SliderComposite(panel, "Crystalizer")
+        self.__cmp_crystalizer.bind_toggle_event(
+            lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.CRYSTALIZER_TOGGLE, event=event))
+        self.__cmp_crystalizer.bind_slider_event(
+            lambda event: self.__controller.on_slide(audio_feature=AudioFeature.CRYSTALIZER_SLIDER, event=event))
         vbox.Add(self.__cmp_crystalizer, flag=flags, border=5)
 
         ## bass
-        self.__cmp_bass = SbxTab.SliderComposite(panel, "Bass")
-        self.__cmp_bass.bind_toggle_event(lambda event: self.on_toggle(slider_composite=self.__cmp_bass,
-                                                                       audio_feature=AudioFeature.BASS_TOGGLE,
-                                                                       event=event))
-        self.__cmp_bass.bind_slider_event(lambda event: self.on_slide(slider_composite=self.__cmp_bass,
-                                                                      audio_feature=AudioFeature.BASS_SLIDER))
+        self.__cmp_bass = View.SliderComposite(panel, "Bass")
+        self.__cmp_bass.bind_toggle_event(
+            lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.BASS_TOGGLE, event=event))
+        self.__cmp_bass.bind_slider_event(lambda event: self.__controller.on_slide(
+            audio_feature=AudioFeature.BASS_SLIDER, event=event))
         vbox.Add(self.__cmp_bass, flag=flags, border=5)
 
         ## smart volume
-        self.__cmp_smart_volume = SbxTab.SmartVolumeSpecialComposite(panel, "Smart Volume")
-        self.__cmp_smart_volume.bind_toggle_event(lambda event: self.on_toggle(slider_composite=self.__cmp_smart_volume,
-                                                                               audio_feature=AudioFeature.SMART_VOLUME_TOGGLE,
-                                                                               event=event))
-        self.__cmp_smart_volume.bind_slider_event(lambda event: self.on_slide(slider_composite=self.__cmp_smart_volume,
-                                                                              audio_feature=AudioFeature.SMART_VOLUME_SLIDER))
-        self.__cmp_smart_volume.bind_night_button_event(lambda event: self.on_smart_volume_special(
+        self.__cmp_smart_volume = View.SmartVolumeSpecialComposite(panel, "Smart Volume")
+        self.__cmp_smart_volume.bind_toggle_event(
+            lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.SMART_VOLUME_TOGGLE,
+                                                      event=event))
+        self.__cmp_smart_volume.bind_slider_event(
+            lambda event: self.__controller.on_slide(audio_feature=AudioFeature.SMART_VOLUME_SLIDER, event=event))
+        self.__cmp_smart_volume.bind_night_button_event(lambda event: self.__controller.on_smart_volume_special(
             smart_volume_special_hex=SmartVolumeSpecialHex.SMART_VOLUME_NIGHT))
-        self.__cmp_smart_volume.bind_loud_button_event(lambda event: self.on_smart_volume_special(
+        self.__cmp_smart_volume.bind_loud_button_event(lambda event: self.__controller.on_smart_volume_special(
             smart_volume_special_hex=SmartVolumeSpecialHex.SMART_VOLUME_LOUD))
         vbox.Add(self.__cmp_smart_volume, flag=flags, border=5)
 
         ## dialog plus
-        self.__cmp_dialog_plus = SbxTab.SliderComposite(panel, "Dialog Plus")
-        self.__cmp_dialog_plus.bind_toggle_event(lambda event: self.on_toggle(slider_composite=self.__cmp_dialog_plus,
-                                                                              audio_feature=AudioFeature.DIALOG_PLUS_TOGGLE,
-                                                                              event=event))
-        self.__cmp_dialog_plus.bind_slider_event(lambda event: self.on_slide(slider_composite=self.__cmp_dialog_plus,
-                                                                             audio_feature=AudioFeature.DIALOG_PLUS_SLIDER))
+        self.__cmp_dialog_plus = View.SliderComposite(panel, "Dialog Plus")
+        self.__cmp_dialog_plus.bind_toggle_event(
+            lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.DIALOG_PLUS_TOGGLE, event=event))
+        self.__cmp_dialog_plus.bind_slider_event(
+            lambda event: self.__controller.on_slide(audio_feature=AudioFeature.DIALOG_PLUS_SLIDER, event=event))
         vbox.Add(self.__cmp_dialog_plus, flag=flags, border=5)
 
         panel.SetSizer(vbox)
@@ -193,29 +387,249 @@ class SbxTab:
         self.__cmp_smart_volume.update_availability(g6_api=g6_api)
         self.__cmp_dialog_plus.update_availability(g6_api=g6_api)
 
-    def on_toggle(self, slider_composite: SliderComposite, audio_feature: AudioFeature, event):
+    def get_surround_toggle_value(self) -> bool:
+        return self.__cmp_surround.get_toggle_value()
+
+    def set_surround_toggle_value(self, enabled: bool):
+        self.__cmp_surround.set_toggle_value(enabled)
+
+    def get_surround_toggle_enabled(self) -> bool:
+        return self.__cmp_surround.is_toggle_enabled()
+
+    def set_surround_toggle_enabled(self, enabled: bool):
+        self.__cmp_surround.set_toggle_enabled(enabled)
+
+    def get_surround_slider_value(self) -> int:
+        return self.__cmp_surround.get_slider_value()
+
+    def set_surround_slider_value(self, value: int):
+        self.__cmp_surround.set_slider_value(value)
+
+    def set_surround_slider_enabled(self, enabled: bool):
+        self.__cmp_surround.set_slider_enabled(enabled)
+
+    def set_surround_special_buttons_enabled(self, enabled: bool):
+        self.__cmp_surround.set_special_buttons_enabled(enabled)
+
+    def get_crystalizer_toggle_value(self) -> bool:
+        return self.__cmp_crystalizer.get_toggle_value()
+
+    def set_crystalizer_toggle_value(self, enabled: bool):
+        self.__cmp_crystalizer.set_toggle_value(enabled)
+
+    def get_crystalizer_toggle_enabled(self) -> bool:
+        return self.__cmp_crystalizer.is_toggle_enabled()
+
+    def set_crystalizer_toggle_enabled(self, enabled: bool):
+        self.__cmp_crystalizer.set_toggle_enabled(enabled)
+
+    def set_crystalizer_slider_enabled(self, enabled: bool):
+        self.__cmp_crystalizer.set_slider_enabled(enabled)
+
+    def get_crystalizer_slider_value(self) -> int:
+        return self.__cmp_crystalizer.get_slider_value()
+
+    def set_crystalizer_slider_value(self, value: int):
+        self.__cmp_crystalizer.set_slider_value(value)
+
+    def set_crystalizer_special_buttons_enabled(self, enabled: bool):
+        self.__cmp_crystalizer.set_special_buttons_enabled(enabled)
+
+    def get_bass_toggle_value(self) -> bool:
+        return self.__cmp_bass.get_toggle_value()
+
+    def set_bass_toggle_value(self, enabled: bool):
+        self.__cmp_bass.set_toggle_value(enabled)
+
+    def get_bass_toggle_enabled(self) -> bool:
+        return self.__cmp_bass.is_toggle_enabled()
+
+    def set_bass_toggle_enabled(self, enabled: bool):
+        self.__cmp_bass.set_toggle_enabled(enabled)
+
+    def get_bass_slider_value(self) -> int:
+        return self.__cmp_bass.get_slider_value()
+
+    def set_bass_slider_value(self, value: int):
+        self.__cmp_bass.set_slider_value(value)
+
+    def set_bass_slider_enabled(self, enabled: bool):
+        self.__cmp_bass.set_slider_enabled(enabled)
+
+    def set_bass_special_buttons_enabled(self, enabled: bool):
+        self.__cmp_bass.set_special_buttons_enabled(enabled)
+
+    def get_smart_volume_toggle_value(self) -> bool:
+        return self.__cmp_smart_volume.get_toggle_value()
+
+    def set_smart_volume_toggle_value(self, enabled: bool):
+        self.__cmp_smart_volume.set_toggle_value(enabled)
+
+    def get_smart_volume_toggle_enabled(self) -> bool:
+        return self.__cmp_smart_volume.is_toggle_enabled()
+
+    def set_smart_volume_toggle_enabled(self, enabled: bool):
+        self.__cmp_smart_volume.set_toggle_enabled(enabled)
+
+    def get_smart_volume_slider_value(self) -> int:
+        return self.__cmp_smart_volume.get_slider_value()
+
+    def set_smart_volume_slider_value(self, value: int):
+        self.__cmp_smart_volume.set_slider_value(value)
+
+    def set_smart_volume_slider_enabled(self, enabled: bool):
+        self.__cmp_smart_volume.set_slider_enabled(enabled)
+
+    def set_smart_volume_special_buttons_enabled(self, enabled: bool):
+        self.__cmp_smart_volume.set_special_buttons_enabled(enabled)
+
+    def get_dialog_plus_toggle_value(self) -> bool:
+        return self.__cmp_dialog_plus.get_toggle_value()
+
+    def set_dialog_plus_toggle_value(self, enabled: bool):
+        self.__cmp_dialog_plus.set_toggle_value(enabled)
+
+    def get_dialog_plus_toggle_enabled(self) -> bool:
+        return self.__cmp_dialog_plus.is_toggle_enabled()
+
+    def set_dialog_plus_toggle_enabled(self, enabled: bool):
+        self.__cmp_dialog_plus.set_toggle_enabled(enabled)
+
+    def get_dialog_plus_slider_value(self) -> int:
+        return self.__cmp_dialog_plus.get_slider_value()
+
+    def set_dialog_plus_slider_value(self, value: int):
+        self.__cmp_dialog_plus.set_slider_value(value)
+
+    def set_dialog_plus_slider_enabled(self, enabled: bool):
+        self.__cmp_dialog_plus.set_slider_enabled(enabled)
+
+    def set_dialog_plus_special_buttons_enabled(self, enabled: bool):
+        self.__cmp_dialog_plus.set_special_buttons_enabled(enabled)
+
+
+class Controller:
+    def __init__(self):
+        self.__model: Model | None = None
+        self.__view: View | None = None  # use only in exceptional cases, update the view indirectly by using the model
+        self.__g6_api: G6Api | None = None
+
+    def bind(self, model: Model, view: View):
+        self.__model = model
+        self.__view = view
+
+    def update_availability(self, g6_api: G6Api | None):
+        self.__g6_api = g6_api
+
+        slider_available = False
+        toggle_available = False
+        if self.__g6_api is not None:
+            slider_available = self.__g6_api.sbx_slider_available()
+            toggle_available = self.__g6_api.sbx_toggle_available()
+        available = slider_available and toggle_available
+
+        self.__model.set_surround_available(available)
+        self.__model.set_bass_available(available)
+        self.__model.set_crystalizer_available(available)
+        self.__model.set_smart_volume_available(available)
+        self.__model.set_dialog_plus_available(available)
+
+    def on_toggle(self, audio_feature: AudioFeature, event):
         # get the toggle button and the button's state
         toggle = event.GetEventObject()
         toggle_value = toggle.GetValue()
 
-        # enable or disable slider
-        slider_composite.set_slider_enabled(toggle_value)
+        # update model
+        slider_audio_feature: AudioFeature
+        slider_value: int
+        match audio_feature:
+            case AudioFeature.SURROUND_TOGGLE:
+                self.__model.set_surround_active(toggle_value)
+                slider_audio_feature = AudioFeature.SURROUND_SLIDER
+                slider_value = self.__model.get_surround_value()
+            case AudioFeature.CRYSTALIZER_TOGGLE:
+                self.__model.set_crystalizer_active(toggle_value)
+                slider_audio_feature = AudioFeature.CRYSTALIZER_SLIDER
+                slider_value = self.__model.get_crystalizer_value()
+            case AudioFeature.BASS_TOGGLE:
+                self.__model.set_bass_active(toggle_value)
+                slider_audio_feature = AudioFeature.BASS_SLIDER
+                slider_value = self.__model.get_bass_value()
+            case AudioFeature.SMART_VOLUME_TOGGLE:
+                self.__model.set_smart_volume_active(toggle_value)
+                slider_audio_feature = AudioFeature.SMART_VOLUME_SLIDER
+                slider_value = self.__model.get_smart_volume_value()
+            case AudioFeature.DIALOG_PLUS_TOGGLE:
+                self.__model.set_dialog_plus_active(toggle_value)
+                slider_audio_feature = AudioFeature.DIALOG_PLUS_SLIDER
+                slider_value = self.__model.get_dialog_plus_value()
+            case _:
+                raise ValueError(f"Unsupported audio feature: {audio_feature}!")
 
-        # enable or disable special buttons
-        slider_composite.set_special_buttons_enabled(toggle_value)
-
-        # update toggle button label
-        toggle.SetLabel("Enabled" if toggle_value else "Disabled")
-
+        # send toggle command to G6
         if self.__g6_api is not None:
+            # activate or deactivate audio feature on G6
             self.__g6_api.sbx_toggle(audio_feature=audio_feature, activate=toggle_value)
-            self.on_slide(slider_composite=slider_composite, audio_feature=audio_feature)
+            self.__on_slide(audio_feature=slider_audio_feature, value=slider_value)
 
-    def on_slide(self, slider_composite: SliderComposite, audio_feature: AudioFeature):
+    def on_slide(self, audio_feature: AudioFeature, event):
+        # get the slider value
+        slider = event.GetEventObject()
+        value = slider.GetValue()
+
+        # update the model and send slider command to G6
+        self.__on_slide(audio_feature=audio_feature, value=value)
+
+    def __on_slide(self, audio_feature: AudioFeature, value: int):
+        # update model
+        match audio_feature:
+            case AudioFeature.SURROUND_SLIDER:
+                self.__model.set_surround_value(value)
+            case AudioFeature.CRYSTALIZER_SLIDER:
+                self.__model.set_crystalizer_value(value)
+            case AudioFeature.BASS_SLIDER:
+                self.__model.set_bass_value(value)
+            case AudioFeature.DIALOG_PLUS_SLIDER:
+                self.__model.set_dialog_plus_value(value)
+            case AudioFeature.SMART_VOLUME_SLIDER:
+                self.__model.set_smart_volume_value(value)
+            case _:
+                raise ValueError(f"Unsupported audio feature: {audio_feature}!")
+
+        # send slider value to G6
         if self.__g6_api is not None:
-            slider_value = slider_composite.get_slider_value()
-            self.__g6_api.sbx_slider(audio_feature=audio_feature, value=slider_value)
+            self.__g6_api.sbx_slider(audio_feature=audio_feature, value=value)
 
     def on_smart_volume_special(self, smart_volume_special_hex: SmartVolumeSpecialHex):
+        # update model
+        match smart_volume_special_hex:
+            case SmartVolumeSpecialHex.SMART_VOLUME_NIGHT:
+                self.__model.set_smart_volume_night_mode()
+                self.__model.set_smart_volume_value(0)
+            case SmartVolumeSpecialHex.SMART_VOLUME_LOUD:
+                self.__model.set_smart_volume_loud_mode()
+                self.__model.set_smart_volume_value(100)
+            case _:
+                raise ValueError(f"Unsupported smart volume special hex: {smart_volume_special_hex}!")
+
+        # send smart volume special command to G6
         if self.__g6_api is not None:
             self.__g6_api.sbx_smart_volume_special(smart_volume_special_hex=smart_volume_special_hex)
+
+
+class SbxTab:
+    def __init__(self):
+        self.__model = Model()
+        self.__view = View()
+        self.__controller = Controller()
+
+        # create bindings
+        self.__model.bind(self.__view)
+        self.__view.bind(self.__controller)
+        self.__controller.bind(self.__model, self.__view)
+
+    def create(self, notebook: wx.Notebook) -> wx.Panel:
+        return self.__view.create(notebook)
+
+    def update_availability(self, g6_api: G6Api | None):
+        self.__controller.update_availability(g6_api=g6_api)

@@ -3,17 +3,42 @@ from enum import Enum
 
 class AudioComponent:
     def __init__(self):
-        self.__enable = False
-        self.__value = 0
+        self.__available = False
+        self.__active = False
+        self.__value = 50
+
+    def is_available(self) -> bool:
+        return self.__available
+
+    def set_available(self, available: bool):
+        self.__available = available
+
+    def is_active(self) -> bool:
+        return self.__active
+
+    def set_active(self, active: bool):
+        self.__active = active
+
+    def get_value(self) -> int:
+        return self.__value
+
+    def set_value(self, value: int):
+        self.__value = value
 
 
-class SbxProfile:
+class AudioComponentSmartVolume(AudioComponent):
     def __init__(self):
-        self.__surround = AudioComponent()
-        self.__crystalizer = AudioComponent()
-        self.__bass = AudioComponent()
-        self.__smart_volume = AudioComponent()
-        self.__dialog_plus = AudioComponent()
+        super().__init__()
+        self.__night_mode = False
+        self.__loud_mode = False
+
+    def set_night_mode(self):
+        self.__night_mode = True
+        self.__loud_mode = False
+
+    def set_loud_mode(self):
+        self.__loud_mode = True
+        self.__night_mode = False
 
 
 class AudioMode(Enum):
@@ -34,97 +59,33 @@ class AudioPhase(Enum):
     SLOW_LINEAR = 3
 
 
-class AudioBitRate(Enum):
-    BIT_16 = 0
-    BIT_24 = 1
-    BIT_32 = 2
-
-
-class AudioPlaybackSampleRate(Enum):
-    KHZ_48 = 0
-    KHZ_88 = 1
-    KHZ_96 = 2
-
-
-class AudioPlaybackQuality:
-    def __init__(self, audio_playback_bit_rate: AudioBitRate, audio_playback_sample_rate: AudioPlaybackSampleRate):
-        self.__audio_playback_bit_rate = audio_playback_bit_rate
-        self.__audio_playback_sample_rate = audio_playback_sample_rate
-
-
-class Playback:
-    def __init__(self):
-        self.__audio_output = AudioOutput.SPEAKERS
-        self.__speakers_mode = AudioMode.STEREO
-        self.__headphones_mode = AudioMode.STEREO
-        self.__direct_mode_enabled = False
-        self.__spdif_out_direct_mode_enabled = False
-        self.__audio_phase = AudioPhase.FAST_MINIMAL
-        self.__audio_quality = AudioPlaybackQuality(AudioBitRate.BIT_32, AudioPlaybackSampleRate.KHZ_96)
-
-
-class VoiceMorph(Enum):
-    NEUTRAL = 0
-    MALE = 1
-    FEMALE = 2
-    CHILD = 3
-    GRANDMA = 4
-    DARK_VOICE = 5
-    NORTHERN_LIGHT = 6
-    UNSTABLE = 7
-    EMO = 8
-    ELF = 9
-    DWARF = 10
-    INTRUDER = 11
-    UR = 12
-    ORC = 13
-    MARINE = 14
-    HAMSTER = 15
-    ROBOTER = 16
-
-
-class AudioRecordingChannels(Enum):
-    TWO_CHANNELS = 0
-
-
-class AudioRecordingSampleRate(Enum):
-    KHZ_44 = 0
-    KHZ_48 = 1
-    KHZ_88 = 2
-    KHZ_96 = 3
-    KHZ_176 = 4
-    KHZ_192 = 5
-
-
-class AudioRecordingQuality:
-    def __init__(self,
-                 audio_recording_channels: AudioRecordingChannels,
-                 audio_recording_bit_rate: AudioBitRate,
-                 audio_recording_sample_rate: AudioRecordingSampleRate):
-        self.__audio_recording_channels = audio_recording_channels
-        self.__audio_recording_bit_rate = audio_recording_bit_rate
-        self.__audio_recording_sample_rate = audio_recording_sample_rate
+class MicrophoneEqualizerPreset(Enum):
+    PRESET_1 = "Preset 1 - Reduce bass, harshness, improve clarity"
+    PRESET_2 = "Preset 2 - Reduce bass, improve vocal clarity"
+    PRESET_3 = "Preset 3 - Reduce harshness, improve vocal"
+    PRESET_4 = "Preset 4 - Reduce bass, improve vocal"
+    PRESET_5 = "Preset 5 - Improve vocal, reduce harshness"
+    PRESET_6 = "Preset 6 - Reduce bass, improve clarity"
+    PRESET_7 = "Preset 7 - Reduce vocal, improve bass/clarity"
+    PRESET_8 = "Preset 8 - Reduce harshness, improve vocal/clarity"
+    PRESET_9 = "Preset 9 - Reduce harshness, imrpove clarity"
+    PRESET_10 = "Preset 10 - Improve clarity"
+    PRESET_DM_1 = "Preset DM-1 - Improve vocal clarity"
 
 
 class Recording:
     def __init__(self):
         self.__microphone_volume = 0
         self.__microphone_boost = 0
-        self.__use_device_as_playback_source = False
+        self.__mic_monitoring_enabled = False
+        self.__mic_monitoring_volume = 0
         self.__voice_clarity_enabled = False
         self.__voice_clarity_noise_reduction_enabled = False
         self.__voice_clarity_noise_reduction_value = 0
         self.__voice_clarity_acoustic_echo_cancellation_enabled = False
         self.__voice_clarity_smart_volume_enabled = False
         self.__voice_clarity_microphone_equalizer_enabled = False
-        self.__voice_morph_enabled = False
-        self.__voice_morph_value = VoiceMorph.NEUTRAL
-        self.__line_in = AudioRecordingQuality(AudioRecordingChannels.TWO_CHANNELS, AudioBitRate.BIT_16,
-                                               AudioRecordingSampleRate.KHZ_44)
-        self.__spdif_in = AudioRecordingQuality(AudioRecordingChannels.TWO_CHANNELS, AudioBitRate.BIT_16,
-                                                AudioRecordingSampleRate.KHZ_44)
-        self.__what_u_hear = AudioRecordingQuality(AudioRecordingChannels.TWO_CHANNELS, AudioBitRate.BIT_16,
-                                                   AudioRecordingSampleRate.KHZ_44)
+        self.__voice_clarity_microphone_equalizer_preset = MicrophoneEqualizerPreset.PRESET_1
 
 
 class Decoder(Enum):
@@ -161,14 +122,4 @@ class RGB:
 
 class Lighting:
     def __init__(self):
-        self.__light_rgb = RGB(128, 128, 128)
-
-
-class G6Model:
-    def __init__(self):
-        self.__sbx_profile = SbxProfile()
-        self.__playback = Playback()
-        self.__recording = Recording()
-        self.__decoder = Decoder.NORMAL
-        self.__mixer = Mixer()
-        self.__lighting = Lighting()
+        self.__light_rgb = RGB(255, 0, 0)

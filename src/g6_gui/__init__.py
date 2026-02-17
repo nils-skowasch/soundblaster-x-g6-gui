@@ -77,9 +77,11 @@ class AudioSettingsFrame(wx.Frame):
 
         def handle_btn_claim(event):
             self.__g6_api.claim_audio_interface()
+            self.__update_availability()
 
         def handle_btn_release(event):
             self.__g6_api.release_audio_interface()
+            self.__update_availability()
 
         def handle_btn_apply(event):
             self.__g6_api.playback_mute(mute=True)
@@ -129,6 +131,11 @@ class AudioSettingsFrame(wx.Frame):
 
     def __update_availability(self):
         self.__tab_sbx.update_availability(g6_api=self.__g6_api)
+        self.__tab_playback.update_availability(g6_api=self.__g6_api)
+        self.__tab_recording.update_availability(g6_api=self.__g6_api)
+        self.__tab_decoder.update_availability(g6_api=self.__g6_api)
+        self.__tab_mixer.update_availability(g6_api=self.__g6_api)
+        self.__tab_lighting.update_availability(g6_api=self.__g6_api)
 
 
 def main():
