@@ -8,6 +8,7 @@ from src.g6_gui.g6_tab_decoder import DecoderTab
 from src.g6_gui.g6_tab_mixer import MixerTab
 from src.g6_gui.g6_tab_lighting import LightingTab
 
+
 class AudioSettingsFrame(wx.Frame):
 
     def __init__(self):
@@ -21,6 +22,12 @@ class AudioSettingsFrame(wx.Frame):
         self.panel_main.SetSizer(self.vbox_main)
 
         # create notebook
+        self.__tab_sbx = None
+        self.__tab_playback = None
+        self.__tab_recording = None
+        self.__tab_decoder = None
+        self.__tab_mixer = None
+        self.__tab_lighting = None
         self.notebook = self.__create_notebook(self.panel_main)
         self.vbox_main.Add(self.notebook, flag=wx.EXPAND, proportion=1, border=5)
 
@@ -29,7 +36,10 @@ class AudioSettingsFrame(wx.Frame):
         self.vbox_main.Add(self.panel_footer, flag=wx.EXPAND, proportion=0, border=5)
 
         # initialize variables
-        self.__g6_api : G6Api | None = None
+        self.__g6_api: G6Api | None = None
+
+        # define component states
+        self.__update_availability()
 
     def open(self):
         self.Centre()
@@ -40,20 +50,30 @@ class AudioSettingsFrame(wx.Frame):
         notebook = wx.Notebook(parent)
 
         # create tabs
-        notebook.AddPage(SbxTab().create(notebook), 'SBX-Profile')
-        notebook.AddPage(PlaybackTab().create(notebook), "Playback")
+        self.__tab_sbx = SbxTab()
+        notebook.AddPage(self.__tab_sbx.create(notebook), 'SBX-Profile')
 
-        notebook.AddPage(RecordingTab().create(notebook), "Recording")
-        notebook.AddPage(DecoderTab().create(notebook), "Decoder")
-        notebook.AddPage(MixerTab(self).create(notebook), "Mixer")
+        self.__tab_playback = PlaybackTab()
+        notebook.AddPage(self.__tab_playback.create(notebook), "Playback")
 
-        notebook.AddPage(LightingTab().create(notebook), "Lighting")
+        self.__tab_recording = RecordingTab()
+        notebook.AddPage(self.__tab_recording.create(notebook), "Recording")
+
+        self.__tab_decoder = DecoderTab()
+        notebook.AddPage(self.__tab_decoder.create(notebook), "Decoder")
+
+        self.__tab_mixer = MixerTab(self)
+        notebook.AddPage(self.__tab_mixer.create(notebook), "Mixer")
+
+        self.__tab_lighting = LightingTab()
+        notebook.AddPage(self.__tab_lighting.create(notebook), "Lighting")
 
         return notebook
 
     def __create_footer(self, parent: wx.Panel) -> wx.Panel:
         def handle_btn_lookup(event):
             self.__g6_api = G6Api(dry_run=False)
+            self.__update_availability()
 
         def handle_btn_claim(event):
             self.__g6_api.claim_audio_interface()
@@ -106,6 +126,9 @@ class AudioSettingsFrame(wx.Frame):
         btn_reload_alsa_and_pipewire.Bind(wx.EVT_BUTTON, lambda event: handle_btn_reload_alsa_and_pipewire(event))
 
         return panel_footer
+
+    def __update_availability(self):
+        self.__tab_sbx.update_availability(g6_api=self.__g6_api)
 
 
 def main():
