@@ -54,29 +54,6 @@ class AudioSettingsFrame(wx.Frame):
         self.Centre()
         self.Show()
 
-    # --- Styling helpers -------------------------------------------------
-
-    @staticmethod
-    def __set_label_bold(label: wx.StaticText) -> None:
-        font = label.GetFont()
-        if font.IsOk():
-            label.SetFont(font.Bold())
-
-    def __apply_status_color(self, value_label: wx.StaticText, value: str) -> None:
-        normalized = value.strip().lower()
-
-        good_values = {self.TEXT_AVAILABLE, self.TEXT_CLAIMED}
-        bad_values = {self.TEXT_NOT_FOUND, self.TEXT_UNAVAILABLE, self.TEXT_UNAVAILABLE_NOT_CLAIMED}
-
-        if normalized in good_values:
-            value_label.SetForegroundColour(wx.Colour(0, 140, 0))  # green
-        elif normalized in bad_values:
-            value_label.SetForegroundColour(wx.Colour(200, 0, 0))  # red
-        else:
-            value_label.SetForegroundColour(wx.NullColour)  # default/theme color
-
-        value_label.Refresh()
-
     def __create_status_composite(self, parent: wx.Panel) -> wx.Panel:
         panel = wx.Panel(parent)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -206,10 +183,11 @@ class AudioSettingsFrame(wx.Frame):
 
     def __update_availability(self):
         # update status labels
+        ## g6_status
         g6_status = self.TEXT_AVAILABLE if self.__g6_api is not None else self.TEXT_NOT_FOUND
         self.__lbl_status_value.SetLabel(g6_status)
         self.__apply_status_color(self.__lbl_status_value, g6_status)
-
+        ## hid_status
         hid_status = (
             self.TEXT_AVAILABLE
             if self.__g6_api is not None and self.__g6_api.is_hid_interface_available()
@@ -217,7 +195,7 @@ class AudioSettingsFrame(wx.Frame):
         )
         self.__lbl_hid_interface_status_value.SetLabel(hid_status)
         self.__apply_status_color(self.__lbl_hid_interface_status_value, hid_status)
-
+        ## audio_status
         audio_status = (
             self.TEXT_CLAIMED
             if self.__g6_api is not None and self.__g6_api.is_audio_interface_available()
@@ -233,6 +211,27 @@ class AudioSettingsFrame(wx.Frame):
         self.__tab_decoder.update_availability(g6_api=self.__g6_api)
         self.__tab_mixer.update_availability(g6_api=self.__g6_api)
         self.__tab_lighting.update_availability(g6_api=self.__g6_api)
+
+    @staticmethod
+    def __set_label_bold(label: wx.StaticText) -> None:
+        font = label.GetFont()
+        if font.IsOk():
+            label.SetFont(font.Bold())
+
+    def __apply_status_color(self, value_label: wx.StaticText, value: str) -> None:
+        normalized = value.strip().lower()
+
+        good_values = {self.TEXT_AVAILABLE, self.TEXT_CLAIMED}
+        bad_values = {self.TEXT_NOT_FOUND, self.TEXT_UNAVAILABLE, self.TEXT_UNAVAILABLE_NOT_CLAIMED}
+
+        if normalized in good_values:
+            value_label.SetForegroundColour(wx.Colour(0, 140, 0))  # green
+        elif normalized in bad_values:
+            value_label.SetForegroundColour(wx.Colour(200, 0, 0))  # red
+        else:
+            value_label.SetForegroundColour(wx.NullColour)  # default/theme color
+
+        value_label.Refresh()
 
 
 def main():

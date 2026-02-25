@@ -4,6 +4,7 @@ import wx
 
 from g6_cli import G6Api
 from g6_cli.g6_spec import BOTH_CHANNELS, Channel
+from g6_cli.g6_spec.mixer import MIXER_VR
 
 
 class Model:
@@ -99,6 +100,8 @@ class Model:
 
     def set_playback_volume(self, value: int) -> None:
         self.__playback_volume = value
+        self.__playback_volume_l = value
+        self.__playback_volume_r = value
         self.__view.set_playback_volume_value(value)
 
     def get_playback_volume_l(self) -> int:
@@ -141,6 +144,8 @@ class Model:
 
     def set_monitoring_line_in_volume(self, value: int) -> None:
         self.__monitoring_line_in_volume = value
+        self.__monitoring_line_in_volume_l = value
+        self.__monitoring_line_in_volume_r = value
         self.__view.set_monitoring_line_in_volume_value(value)
 
     def get_monitoring_line_in_volume_l(self) -> int:
@@ -183,6 +188,8 @@ class Model:
 
     def set_monitoring_external_mic_volume(self, value: int) -> None:
         self.__monitoring_external_mic_volume = value
+        self.__monitoring_external_mic_volume_l = value
+        self.__monitoring_external_mic_volume_r = value
         self.__view.set_monitoring_external_mic_volume_value(value)
 
     def get_monitoring_external_mic_volume_l(self) -> int:
@@ -225,6 +232,8 @@ class Model:
 
     def set_monitoring_spdif_in_volume(self, value: int) -> None:
         self.__monitoring_spdif_in_volume = value
+        self.__monitoring_spdif_in_volume_l = value
+        self.__monitoring_spdif_in_volume_r = value
         self.__view.set_monitoring_spdif_in_volume_value(value)
 
     def get_monitoring_spdif_in_volume_l(self) -> int:
@@ -267,6 +276,8 @@ class Model:
 
     def set_recording_external_mic_volume(self, value: int) -> None:
         self.__recording_external_mic_volume = value
+        self.__recording_external_mic_volume_l = value
+        self.__recording_external_mic_volume_r = value
         self.__view.set_recording_external_mic_volume_value(value)
 
     def get_recording_external_mic_volume_l(self) -> int:
@@ -309,6 +320,8 @@ class Model:
 
     def set_recording_line_in_volume(self, value: int) -> None:
         self.__recording_line_in_volume = value
+        self.__recording_line_in_volume_l = value
+        self.__recording_line_in_volume_r = value
         self.__view.set_recording_line_in_volume_value(value)
 
     def get_recording_line_in_volume_l(self) -> int:
@@ -351,6 +364,8 @@ class Model:
 
     def set_recording_spdif_in_volume(self, value: int) -> None:
         self.__recording_spdif_in_volume = value
+        self.__recording_spdif_in_volume_l = value
+        self.__recording_spdif_in_volume_r = value
         self.__view.set_recording_spdif_in_volume_value(value)
 
     def get_recording_spdif_in_volume_l(self) -> int:
@@ -393,6 +408,8 @@ class Model:
 
     def set_recording_what_u_hear_volume(self, value: int) -> None:
         self.__recording_what_u_hear_volume = value
+        self.__recording_what_u_hear_volume_l = value
+        self.__recording_what_u_hear_volume_r = value
         self.__view.set_recording_what_u_hear_volume_value(value)
 
     def get_recording_what_u_hear_volume_l(self) -> int:
@@ -427,7 +444,11 @@ class View:
             self.__chk_active = wx.CheckBox(parent, label="Active")
             self.__chk_active.SetValue(True)
 
-            self.__sld = wx.Slider(parent, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
+            self.__sld = wx.Slider(parent,
+                                   minValue=MIXER_VR.get_min_value() // MIXER_VR.get_step_size(),
+                                   maxValue=MIXER_VR.get_max_value() // MIXER_VR.get_step_size(),
+                                   value=50 // MIXER_VR.get_step_size(),
+                                   style=wx.SL_HORIZONTAL)
 
             self.__btn_gears = wx.Button(parent, label="⚙", size=wx.Size(40, -1))
 
@@ -452,11 +473,11 @@ class View:
         def set_toggle_enabled(self, enabled: bool) -> None:
             self.__chk_active.Enable(enabled)
 
-        def set_slider_value(self, value: int) -> None:
-            self.__sld.SetValue(int(value))
-
         def get_slider_value(self) -> int:
-            return int(self.__sld.GetValue())
+            return int(self.__sld.GetValue()) * MIXER_VR.get_step_size()
+
+        def set_slider_value(self, value: int) -> None:
+            self.__sld.SetValue(int(value) // MIXER_VR.get_step_size())
 
         def set_slider_enabled(self, enabled: bool) -> None:
             self.__sld.Enable(enabled)
@@ -577,6 +598,9 @@ class View:
     def set_playback_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_playback.set_toggle_enabled(enabled)
 
+    def get_playback_volume_value(self) -> int:
+        return self.__cmp_playback.get_slider_value()
+
     def set_playback_volume_value(self, value: int) -> None:
         self.__cmp_playback.set_slider_value(value)
 
@@ -593,6 +617,9 @@ class View:
 
     def set_monitoring_line_in_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_monitoring_line_in.set_toggle_enabled(enabled)
+
+    def get_monitoring_line_in_volume_value(self) -> int:
+        return self.__cmp_monitoring_line_in.get_slider_value()
 
     def set_monitoring_line_in_volume_value(self, value: int) -> None:
         self.__cmp_monitoring_line_in.set_slider_value(value)
@@ -611,6 +638,9 @@ class View:
     def set_monitoring_external_mic_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_monitoring_external_mic.set_toggle_enabled(enabled)
 
+    def get_monitoring_external_mic_volume_value(self) -> int:
+        return self.__cmp_monitoring_external_mic.get_slider_value()
+
     def set_monitoring_external_mic_volume_value(self, value: int) -> None:
         self.__cmp_monitoring_external_mic.set_slider_value(value)
 
@@ -627,6 +657,9 @@ class View:
 
     def set_monitoring_spdif_in_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_monitoring_spdif_in.set_toggle_enabled(enabled)
+
+    def get_monitoring_spdif_in_volume_value(self) -> int:
+        return self.__cmp_monitoring_spdif_in.get_slider_value()
 
     def set_monitoring_spdif_in_volume_value(self, value: int) -> None:
         self.__cmp_monitoring_spdif_in.set_slider_value(value)
@@ -645,6 +678,9 @@ class View:
     def set_recording_external_mic_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_recording_external_mic.set_toggle_enabled(enabled)
 
+    def get_recording_external_mic_volume_value(self) -> int:
+        return self.__cmp_recording_external_mic.get_slider_value()
+
     def set_recording_external_mic_volume_value(self, value: int) -> None:
         self.__cmp_recording_external_mic.set_slider_value(value)
 
@@ -661,6 +697,9 @@ class View:
 
     def set_recording_line_in_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_recording_line_in.set_toggle_enabled(enabled)
+
+    def get_recording_line_in_volume_value(self) -> int:
+        return self.__cmp_recording_line_in.get_slider_value()
 
     def set_recording_line_in_volume_value(self, value: int) -> None:
         self.__cmp_recording_line_in.set_slider_value(value)
@@ -679,6 +718,9 @@ class View:
     def set_recording_spdif_in_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_recording_spdif_in.set_toggle_enabled(enabled)
 
+    def get_recording_spdif_in_volume_value(self) -> int:
+        return self.__cmp_recording_spdif_in.get_slider_value()
+
     def set_recording_spdif_in_volume_value(self, value: int) -> None:
         self.__cmp_recording_spdif_in.set_slider_value(value)
 
@@ -695,6 +737,9 @@ class View:
 
     def set_recording_what_u_hear_toggle_enabled(self, enabled: bool) -> None:
         self.__cmp_recording_what_u_hear.set_toggle_enabled(enabled)
+
+    def get_recording_what_u_hear_volume_value(self) -> int:
+        return self.__cmp_recording_what_u_hear.get_slider_value()
 
     def set_recording_what_u_hear_volume_value(self, value: int) -> None:
         self.__cmp_recording_what_u_hear.set_slider_value(value)
@@ -717,8 +762,16 @@ class View:
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        sld_l = wx.Slider(dialog, minValue=0, maxValue=100, value=int(value_l), style=wx.SL_HORIZONTAL)
-        sld_r = wx.Slider(dialog, minValue=0, maxValue=100, value=int(value_r), style=wx.SL_HORIZONTAL)
+        sld_l = wx.Slider(dialog,
+                          minValue=MIXER_VR.get_min_value() // MIXER_VR.get_step_size(),
+                          maxValue=MIXER_VR.get_max_value() // MIXER_VR.get_step_size(),
+                          value=int(value_l) // MIXER_VR.get_step_size(),
+                          style=wx.SL_HORIZONTAL)
+        sld_r = wx.Slider(dialog,
+                          minValue=MIXER_VR.get_min_value() // MIXER_VR.get_step_size(),
+                          maxValue=MIXER_VR.get_max_value() // MIXER_VR.get_step_size(),
+                          value=int(value_r) // MIXER_VR.get_step_size(),
+                          style=wx.SL_HORIZONTAL)
 
         vbox.Add(wx.StaticText(dialog, label="Left"), flag=wx.ALL, border=5)
         vbox.Add(sld_l, flag=wx.ALL | wx.EXPAND, border=5)
@@ -732,7 +785,7 @@ class View:
         result = dialog.ShowModal()
         if result != wx.ID_OK:
             return None
-        return int(sld_l.GetValue()), int(sld_r.GetValue())
+        return int(sld_l.GetValue()) * MIXER_VR.get_step_size(), int(sld_r.GetValue()) * MIXER_VR.get_step_size()
 
 
 class Controller:
@@ -807,22 +860,31 @@ class Controller:
     # --- playback (speakers) ---
 
     def on_toggle_playback(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_playback_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.playback_mute(mute=not active)
             if active:
                 self.__g6_api.playback_volume(volume_percent=self.__model.get_playback_volume(), channels=BOTH_CHANNELS)
 
     def on_slide_playback(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_playback_volume_value()
+
+        # update model
         self.__model.set_playback_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_playback_active():
             self.__g6_api.playback_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_playback(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Playback Settings",
             value_l=self.__model.get_playback_volume_l(),
@@ -831,10 +893,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_playback_volume_l(value_l)
         self.__model.set_playback_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_playback_active():
             self.__g6_api.playback_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.playback_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -842,9 +906,13 @@ class Controller:
     # --- monitoring: line-in ---
 
     def on_toggle_monitoring_line_in(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_monitoring_line_in_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_monitoring_line_in_mute(mute=not active)
             if active:
@@ -854,13 +922,18 @@ class Controller:
                 )
 
     def on_slide_monitoring_line_in(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_monitoring_line_in_volume_value()
+
+        # update model
         self.__model.set_monitoring_line_in_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_line_in_active():
             self.__g6_api.mixer_monitoring_line_in_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_monitoring_line_in(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Monitoring Line-In Settings",
             value_l=self.__model.get_monitoring_line_in_volume_l(),
@@ -869,10 +942,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_monitoring_line_in_volume_l(value_l)
         self.__model.set_monitoring_line_in_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_line_in_active():
             self.__g6_api.mixer_monitoring_line_in_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_monitoring_line_in_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -880,9 +955,13 @@ class Controller:
     # --- monitoring: external mic ---
 
     def on_toggle_monitoring_external_mic(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_monitoring_external_mic_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_monitoring_external_mic_mute(mute=not active)
             if active:
@@ -892,13 +971,18 @@ class Controller:
                 )
 
     def on_slide_monitoring_external_mic(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_monitoring_external_mic_volume_value()
+
+        # update model
         self.__model.set_monitoring_external_mic_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_external_mic_active():
             self.__g6_api.mixer_monitoring_external_mic_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_monitoring_external_mic(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Monitoring External Mic Settings",
             value_l=self.__model.get_monitoring_external_mic_volume_l(),
@@ -907,10 +991,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_monitoring_external_mic_volume_l(value_l)
         self.__model.set_monitoring_external_mic_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_external_mic_active():
             self.__g6_api.mixer_monitoring_external_mic_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_monitoring_external_mic_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -918,9 +1004,13 @@ class Controller:
     # --- monitoring: spdif-in ---
 
     def on_toggle_monitoring_spdif_in(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_monitoring_spdif_in_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_monitoring_spdif_in_mute(mute=not active)
             if active:
@@ -930,13 +1020,18 @@ class Controller:
                 )
 
     def on_slide_monitoring_spdif_in(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_monitoring_spdif_in_volume_value()
+
+        # update model
         self.__model.set_monitoring_spdif_in_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_spdif_in_active():
             self.__g6_api.mixer_monitoring_spdif_in_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_monitoring_spdif_in(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Monitoring SPDIF-In Settings",
             value_l=self.__model.get_monitoring_spdif_in_volume_l(),
@@ -945,10 +1040,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_monitoring_spdif_in_volume_l(value_l)
         self.__model.set_monitoring_spdif_in_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_monitoring_spdif_in_active():
             self.__g6_api.mixer_monitoring_spdif_in_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_monitoring_spdif_in_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -956,9 +1053,13 @@ class Controller:
     # --- recording: external mic ---
 
     def on_toggle_recording_external_mic(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_recording_external_mic_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_recording_external_mic_mute(mute=not active)
             if active:
@@ -968,13 +1069,18 @@ class Controller:
                 )
 
     def on_slide_recording_external_mic(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_recording_external_mic_volume_value()
+
+        # update model
         self.__model.set_recording_external_mic_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_external_mic_active():
             self.__g6_api.mixer_recording_external_mic_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_recording_external_mic(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Recording External Mic Settings",
             value_l=self.__model.get_recording_external_mic_volume_l(),
@@ -983,10 +1089,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_recording_external_mic_volume_l(value_l)
         self.__model.set_recording_external_mic_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_external_mic_active():
             self.__g6_api.mixer_recording_external_mic_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_recording_external_mic_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -994,9 +1102,13 @@ class Controller:
     # --- recording: line-in ---
 
     def on_toggle_recording_line_in(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_recording_line_in_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_recording_line_in_mute(mute=not active)
             if active:
@@ -1006,13 +1118,18 @@ class Controller:
                 )
 
     def on_slide_recording_line_in(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_recording_line_in_volume_value()
+
+        # update model
         self.__model.set_recording_line_in_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_line_in_active():
             self.__g6_api.mixer_recording_line_in_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_recording_line_in(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Recording Line-In Settings",
             value_l=self.__model.get_recording_line_in_volume_l(),
@@ -1021,10 +1138,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_recording_line_in_volume_l(value_l)
         self.__model.set_recording_line_in_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_line_in_active():
             self.__g6_api.mixer_recording_line_in_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_recording_line_in_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -1032,9 +1151,13 @@ class Controller:
     # --- recording: spdif-in ---
 
     def on_toggle_recording_spdif_in(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_recording_spdif_in_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_recording_spdif_in_mute(mute=not active)
             if active:
@@ -1044,13 +1167,18 @@ class Controller:
                 )
 
     def on_slide_recording_spdif_in(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_recording_spdif_in_volume_value()
+
+        # update model
         self.__model.set_recording_spdif_in_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_spdif_in_active():
             self.__g6_api.mixer_recording_spdif_in_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_recording_spdif_in(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Recording SPDIF-In Settings",
             value_l=self.__model.get_recording_spdif_in_volume_l(),
@@ -1059,10 +1187,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_recording_spdif_in_volume_l(value_l)
         self.__model.set_recording_spdif_in_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_spdif_in_active():
             self.__g6_api.mixer_recording_spdif_in_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_recording_spdif_in_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
@@ -1070,9 +1200,13 @@ class Controller:
     # --- recording: what u hear ---
 
     def on_toggle_recording_what_u_hear(self, event) -> None:
+        # receive value
         active = bool(event.GetEventObject().GetValue())
+
+        # update model
         self.__model.set_recording_what_u_hear_active(active)
 
+        # send command to G6
         if self.__g6_api is not None:
             self.__g6_api.mixer_recording_what_u_hear_mute(mute=not active)
             if active:
@@ -1082,13 +1216,18 @@ class Controller:
                 )
 
     def on_slide_recording_what_u_hear(self, event) -> None:
-        value = int(event.GetEventObject().GetValue())
+        # receive value
+        value = self.__view.get_recording_what_u_hear_volume_value()
+
+        # update model
         self.__model.set_recording_what_u_hear_volume(value)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_what_u_hear_active():
             self.__g6_api.mixer_recording_what_u_hear_volume(volume_percent=value, channels=BOTH_CHANNELS)
 
     def on_gears_recording_what_u_hear(self) -> None:
+        # show dialog
         result = self.__view.show_gears_dialog(
             title="Recording What U Hear Settings",
             value_l=self.__model.get_recording_what_u_hear_volume_l(),
@@ -1097,10 +1236,12 @@ class Controller:
         if result is None:
             return
 
+        # update model
         value_l, value_r = result
         self.__model.set_recording_what_u_hear_volume_l(value_l)
         self.__model.set_recording_what_u_hear_volume_r(value_r)
 
+        # send command to G6
         if self.__g6_api is not None and self.__model.is_recording_what_u_hear_active():
             self.__g6_api.mixer_recording_what_u_hear_volume(volume_percent=value_l, channels={Channel.CHANNEL_1})
             self.__g6_api.mixer_recording_what_u_hear_volume(volume_percent=value_r, channels={Channel.CHANNEL_2})
