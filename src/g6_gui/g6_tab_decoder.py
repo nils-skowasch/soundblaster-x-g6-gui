@@ -1,14 +1,7 @@
-from enum import IntEnum
-
 import wx
 
 from g6_cli import G6Api
-
-
-class DecoderMode(IntEnum):
-    NORMAL = 0
-    FULL = 1
-    NIGHT = 2
+from g6_cli.g6_spec.decoder import DecoderMode
 
 
 class Model:
