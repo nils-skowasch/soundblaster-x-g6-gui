@@ -1,0 +1,57 @@
+#
+# Build system
+#
+[build-system]
+requires = ["setuptools>=82.0.0"]
+build-backend = "setuptools.build_meta"
+
+#
+# Project
+#
+[project]
+name = "soundblaster-x-g6-gui"
+version = "1.0.0a3"
+#
+dependencies = [
+    "soundblaster-x-g6-cli==1.0.0a5",
+    "wxPython==4.2.3"
+]
+requires-python = ">=3.12"
+#
+authors = [
+    { name = "Nils Skowasch", email = "nils_s89_dev@gmx.de" }
+]
+maintainers = [
+    { name = "Nils Skowasch", email = "nils_s89_dev@gmx.de" }
+]
+#
+description = "A GUI for controlling the SoundBlaster X G6"
+readme = { file = "readme.md", content-type = "text/markdown" }
+#
+license = "GPL-2.0-only"
+license-files = ["LICENSE"]
+#
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+]
+#
+keywords = ["SoundBlaster X G6", "SoundBlaster X G6 GUI", "GUI"]
+#
+[project.urls]
+Repository = "https://github.com/nils-skowasch/soundblaster-x-g6-gui"
+#
+[project.scripts]
+soundblaster-x-g6-gui = "g6_gui:main"
+
+#
+# Tool: package-dir
+#
+[tool.setuptools.package-dir]
+"" = "src"
+
+#
+# Tool: find
+#
+[tool.setuptools.packages.find]
+where = ["src"]

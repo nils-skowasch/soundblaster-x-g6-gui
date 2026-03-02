@@ -1,12 +1,12 @@
 import wx
 
 from g6_cli import G6Api
-from src.g6_gui.g6_tab_sbx import SbxTab
-from src.g6_gui.g6_tab_playback import PlaybackTab
-from src.g6_gui.g6_tab_recording import RecordingTab
-from src.g6_gui.g6_tab_decoder import DecoderTab
-from src.g6_gui.g6_tab_mixer import MixerTab
-from src.g6_gui.g6_tab_lighting import LightingTab
+from g6_gui.g6_tab_decoder import DecoderTab
+from g6_gui.g6_tab_lighting import LightingTab
+from g6_gui.g6_tab_mixer import MixerTab
+from g6_gui.g6_tab_playback import PlaybackTab
+from g6_gui.g6_tab_recording import RecordingTab
+from g6_gui.g6_tab_sbx import SbxTab
 
 
 class AudioSettingsFrame(wx.Frame):
@@ -130,7 +130,7 @@ class AudioSettingsFrame(wx.Frame):
 
     def __create_footer(self, parent: wx.Panel) -> wx.Panel:
         def handle_btn_lookup(event):
-            self.__g6_api = G6Api(dry_run=False)
+            self.__g6_api = G6Api(dry_run=False, debug=False)
             self.__update_availability()
 
         def handle_btn_claim(event):
