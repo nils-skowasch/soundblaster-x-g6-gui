@@ -518,7 +518,7 @@ class View:
         self.__cmp_playback.bind_gears(lambda event: self.__controller.on_gears_playback())
         grp_playback_sizer.Add(self.__cmp_playback, flag=wx.ALL | wx.EXPAND, border=5)
 
-        vbox.Add(grp_playback_sizer, flag=wx.EXPAND)
+        vbox.Add(grp_playback_sizer, flag=wx.ALL | wx.EXPAND, border=5)
 
         # --- monitoring ---
         grp_monitoring = wx.StaticBox(panel, label="Monitoring")
@@ -547,7 +547,7 @@ class View:
         self.__cmp_monitoring_spdif_in.bind_gears(lambda event: self.__controller.on_gears_monitoring_spdif_in())
         grp_monitoring_sizer.Add(self.__cmp_monitoring_spdif_in, flag=wx.ALL | wx.EXPAND, border=5)
 
-        vbox.Add(grp_monitoring_sizer, flag=wx.EXPAND)
+        vbox.Add(grp_monitoring_sizer, flag=wx.ALL | wx.EXPAND, border=5)
 
         # --- recording ---
         grp_recording = wx.StaticBox(panel, label="Recording")
@@ -585,7 +585,7 @@ class View:
         self.__cmp_recording_what_u_hear.bind_gears(lambda event: self.__controller.on_gears_recording_what_u_hear())
         grp_recording_sizer.Add(self.__cmp_recording_what_u_hear, flag=wx.ALL | wx.EXPAND, border=5)
 
-        vbox.Add(grp_recording_sizer, flag=wx.EXPAND)
+        vbox.Add(grp_recording_sizer, flag=wx.ALL | wx.EXPAND, border=5)
 
         panel.SetSizer(vbox)
         return panel

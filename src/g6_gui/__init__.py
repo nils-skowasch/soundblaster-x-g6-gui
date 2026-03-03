@@ -1,6 +1,8 @@
+import sys
 import wx
 
 from g6_cli import G6Api
+from g6_gui.g6_console import RedirectText
 from g6_gui.g6_tab_decoder import DecoderTab
 from g6_gui.g6_tab_lighting import LightingTab
 from g6_gui.g6_tab_mixer import MixerTab
@@ -9,17 +11,21 @@ from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 
 
-class AudioSettingsFrame(wx.Frame):
+class MainGuiFrame(wx.Frame):
     TEXT_AVAILABLE = "available"
     TEXT_UNAVAILABLE = "unavailable"
     TEXT_CLAIMED = "claimed"
     TEXT_NOT_FOUND = "not found"
     TEXT_UNAVAILABLE_NOT_CLAIMED = "unavailable / not claimed"
 
-    def __init__(self):
-        super().__init__(None, title="SoundBlaster X G6 - GUI", size=wx.Size(840, 630))
+    FRAME_SIZE_INITIAL = wx.Size(1024, 768)
+    FRAME_SIZE_WITH_CONSOLE = wx.Size(FRAME_SIZE_INITIAL.width, FRAME_SIZE_INITIAL.height + 150)
 
-        # create panel with vertical box sizer
+    def __init__(self):
+        super().__init__(None, title="SoundBlaster X G6 - GUI", size=MainGuiFrame.FRAME_SIZE_INITIAL)
+        self.SetMinSize(MainGuiFrame.FRAME_SIZE_INITIAL)
+
+        # create the panel with vertical box sizer
         self.panel_main = wx.Panel(self)
 
         # set vbox sizer as layout manager to panel_main
@@ -28,7 +34,7 @@ class AudioSettingsFrame(wx.Frame):
 
         # G6 status composite
         self.__cmp_status = self.__create_status_composite(self.panel_main)
-        self.vbox_main.Add(self.__cmp_status, flag=wx.EXPAND, proportion=0, border=5)
+        self.vbox_main.Add(self.__cmp_status, flag=wx.ALL, proportion=0, border=5)
 
         # create notebook
         self.__tab_sbx = None
@@ -38,11 +44,31 @@ class AudioSettingsFrame(wx.Frame):
         self.__tab_mixer = None
         self.__tab_lighting = None
         self.notebook = self.__create_notebook(self.panel_main)
-        self.vbox_main.Add(self.notebook, flag=wx.EXPAND, proportion=1, border=5)
+        self.vbox_main.Add(self.notebook, flag=wx.EXPAND | wx.ALL, proportion=1, border=5)
+
+        # create console panel
+        self.__txt_console = None
+        self.panel_console = self.__create_console_panel(self.panel_main)
+        self.vbox_main.Add(self.panel_console, flag=wx.EXPAND | wx.ALL, proportion=10, border=5)
+
+        # setup redirection
+        self.__stdout_redirector = RedirectText(
+            self.__txt_console,
+            wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT),
+            sys.stdout
+        )
+        self.__stderr_redirector = RedirectText(
+            self.__txt_console,
+            wx.Colour(255, 69, 58) if wx.SystemSettings.GetAppearance().IsDark() else wx.Colour(200, 0, 0),
+            sys.stderr
+        )
+        sys.stdout = self.__stdout_redirector
+        sys.stderr = self.__stderr_redirector
+        print("GUI: Console output redirection initialized.")
 
         # create footer
         self.panel_footer = self.__create_footer(self.panel_main)
-        self.vbox_main.Add(self.panel_footer, flag=wx.EXPAND, proportion=0, border=5)
+        self.vbox_main.Add(self.panel_footer, flag=wx.ALL, proportion=0, border=5)
 
         # initialize variables
         self.__g6_api: G6Api | None = None
@@ -104,7 +130,7 @@ class AudioSettingsFrame(wx.Frame):
         return panel
 
     def __create_notebook(self, parent: wx.Panel) -> wx.Notebook:
-        # create notebook (tab folder)
+        # create the notebook (tab folder)
         notebook = wx.Notebook(parent)
 
         # create tabs
@@ -130,7 +156,7 @@ class AudioSettingsFrame(wx.Frame):
 
     def __create_footer(self, parent: wx.Panel) -> wx.Panel:
         def handle_btn_lookup(event):
-            self.__g6_api = G6Api(dry_run=False, debug=False)
+            self.__g6_api = G6Api(dry_run=True, debug=True)
             self.__update_availability()
 
         def handle_btn_claim(event):
@@ -180,6 +206,54 @@ class AudioSettingsFrame(wx.Frame):
         btn_reload_alsa_and_pipewire.Bind(wx.EVT_BUTTON, lambda event: handle_btn_reload_alsa_and_pipewire(event))
 
         return panel_footer
+
+    def __create_console_panel(self, parent: wx.Panel) -> wx.Panel:
+        panel = wx.Panel(parent)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        panel.SetSizer(hbox)
+
+        self.__txt_console = wx.TextCtrl(
+            panel,
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH2,
+        )
+        self.__txt_console.SetMinSize(wx.Size(-1, 150))
+        self.__txt_console.Hide()
+
+        self.__placeholder = wx.Panel(parent=panel)
+
+        self.__btn_toggle_console = wx.Button(panel, label="", size=wx.Size(32, -1))
+        self.__btn_toggle_console.SetToolTip("Show console")
+        self.__btn_toggle_console.Bind(wx.EVT_BUTTON, self.__on_toggle_console)
+
+        hbox.Add(self.__txt_console, flag=wx.EXPAND | wx.RIGHT, proportion=1, border=2)
+        hbox.Add(self.__placeholder, flag=wx.EXPAND | wx.RIGHT, proportion=1, border=2)
+        hbox.Add(self.__btn_toggle_console, flag=wx.ALIGN_BOTTOM | wx.LEFT, proportion=0, border=2)
+
+        return panel
+
+    def __on_toggle_console(self, event):
+        if self.__txt_console.IsShown():
+            # update frame size
+            self.SetMinSize(MainGuiFrame.FRAME_SIZE_INITIAL)
+            self.SetSize(MainGuiFrame.FRAME_SIZE_INITIAL)
+
+            # toggle console visibility
+            self.__txt_console.Hide()
+            self.__placeholder.Show()
+            self.__btn_toggle_console.SetToolTip("Show console")
+
+        else:
+            # update frame size
+            self.SetMinSize(MainGuiFrame.FRAME_SIZE_WITH_CONSOLE)
+            self.SetSize(MainGuiFrame.FRAME_SIZE_WITH_CONSOLE)
+
+            # toggle console visibility
+            self.__txt_console.Show()
+            self.__placeholder.Hide()
+            self.__btn_toggle_console.SetToolTip("Hide console")
+
+        # layout the main panel
+        self.panel_main.Layout()
 
     def __update_availability(self):
         # update status labels
@@ -236,6 +310,6 @@ class AudioSettingsFrame(wx.Frame):
 
 def main():
     app = wx.App(False)
-    frame = AudioSettingsFrame()
+    frame = MainGuiFrame()
     frame.open()
     app.MainLoop()
