@@ -1,3 +1,5 @@
+import argparse
+
 import sys
 import wx
 
@@ -10,14 +12,18 @@ from g6_gui.g6_tab_playback import PlaybackTab
 from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 
+VERSION = '1.0.0a3'
+
 
 class Model:
-    def __init__(self):
+    def __init__(self, dry_run: bool, debug: bool):
         self.__view: View | None = None
         self.__g6_api: G6Api | None = None
         self.__g6_status: str = MainGuiFrame.TEXT_NOT_FOUND
         self.__hid_interface_status: str = MainGuiFrame.TEXT_UNAVAILABLE
         self.__audio_interface_status: str = MainGuiFrame.TEXT_UNAVAILABLE_NOT_CLAIMED
+        self.__dry_run = dry_run
+        self.__debug = debug
 
     def bind(self, view: "View"):
         self.__view = view
@@ -27,6 +33,12 @@ class Model:
 
     def get_g6_api(self) -> G6Api | None:
         return self.__g6_api
+
+    def get_dry_run(self) -> bool:
+        return self.__dry_run
+
+    def get_debug(self) -> bool:
+        return self.__debug
 
     def set_g6_status(self, status: str):
         self.__g6_status = status
@@ -289,7 +301,7 @@ class Controller:
         self.__frame = frame
 
     def on_lookup(self, event):
-        g6_api = G6Api(dry_run=True, debug=True)
+        g6_api = G6Api(dry_run=self.__model.get_dry_run(), debug=self.__model.get_debug())
         self.__model.set_g6_api(g6_api)
         self.update_availability()
 
@@ -357,14 +369,14 @@ class MainGuiFrame(wx.Frame):
     FRAME_SIZE_INITIAL = wx.Size(1024, 768)
     FRAME_SIZE_WITH_CONSOLE = wx.Size(FRAME_SIZE_INITIAL.width, FRAME_SIZE_INITIAL.height + 150)
 
-    def __init__(self):
+    def __init__(self, dry_run: bool, debug: bool):
         super().__init__(None, title="SoundBlaster X G6 - GUI", size=MainGuiFrame.FRAME_SIZE_INITIAL)
         self.SetMinSize(MainGuiFrame.FRAME_SIZE_INITIAL)
 
         self.panel_main = None
         self.__txt_console = None
 
-        self.__model = Model()
+        self.__model = Model(dry_run=dry_run, debug=debug)
         self.__view = View()
         self.__controller = Controller()
 
@@ -408,8 +420,32 @@ class MainGuiFrame(wx.Frame):
         self.Show()
 
 
+def parse_cli_args() -> argparse.Namespace:
+    """
+    Parse the CLI arguments using argparse.
+    :return: The parsed cli args object
+    """
+    parser = argparse.ArgumentParser(description='SoundBlaster X G6 GUI')
+    #
+    # Device / services
+    #
+    general_options_group = parser.add_argument_group('General options')
+    general_options_group.add_argument('--dry-run', required=False, action='store_true',
+                                       help='Used to verify the available hex_line files, without making any calls against the G6 device.')
+    general_options_group.add_argument('--debug', required=False, action='store_true',
+                                       help='Print communication data with the G6 device to the console.')
+    general_options_group.add_argument('--version', action='version', version=f'soundblaster-x-g6-gui {VERSION}')
+
+    # parse args
+    args = parser.parse_args()
+    return args
+
+
 def main():
+    # parse CLI arguments
+    args = parse_cli_args()
+
     app = wx.App(False)
-    frame = MainGuiFrame()
+    frame = MainGuiFrame(dry_run=args.dry_run, debug=args.debug)
     frame.open()
     app.MainLoop()
