@@ -425,7 +425,7 @@ def parse_cli_args() -> argparse.Namespace:
     Parse the CLI arguments using argparse.
     :return: The parsed cli args object
     """
-    parser = argparse.ArgumentParser(description='SoundBlaster X G6 GUI')
+    parser = argparse.ArgumentParser(usage="soundblaster-x-g6-gui", description='SoundBlaster X G6 GUI')
     #
     # Device / services
     #
