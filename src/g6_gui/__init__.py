@@ -34,10 +34,10 @@ class Model:
     def get_g6_api(self) -> G6Api | None:
         return self.__g6_api
 
-    def get_dry_run(self) -> bool:
+    def is_dry_run(self) -> bool:
         return self.__dry_run
 
-    def get_debug(self) -> bool:
+    def is_debug(self) -> bool:
         return self.__debug
 
     def set_g6_status(self, status: str):
@@ -108,30 +108,37 @@ class View:
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         panel.SetSizer(hbox)
 
+        # G6 status
         lbl_status = wx.StaticText(panel, label="G6 Status: ")
         self.__set_label_bold(lbl_status)
         hbox.Add(lbl_status, flag=wx.TOP | wx.BOTTOM | wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=5)
 
-        self.__lbl_status_value = wx.StaticText(panel, label=MainGuiFrame.TEXT_NOT_FOUND, style=wx.ALIGN_CENTER)
+        self.__lbl_status_value = wx.StaticText(panel, label=MainGuiFrame.TEXT_NOT_FOUND, style=wx.ALIGN_LEFT)
+        self.__lbl_status_value.SetMinSize(self.__lbl_status_value.GetBestSize())
         self.__apply_status_color(self.__lbl_status_value, self.__lbl_status_value.GetLabel())
         hbox.Add(self.__lbl_status_value, flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
 
+        # separator
         hbox.Add(wx.StaticText(panel, label="|"), flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)
 
+        # HID interface
         lbl_hid_interface_status = wx.StaticText(panel, label="HID Interface: ")
         self.__set_label_bold(lbl_hid_interface_status)
         hbox.Add(lbl_hid_interface_status, flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
 
         self.__lbl_hid_interface_status_value = wx.StaticText(panel, label=MainGuiFrame.TEXT_UNAVAILABLE,
-                                                              style=wx.ALIGN_CENTER)
+                                                              style=wx.ALIGN_LEFT)
+        self.__lbl_hid_interface_status_value.SetMinSize(self.__lbl_hid_interface_status_value.GetBestSize())
         self.__apply_status_color(
             self.__lbl_hid_interface_status_value,
             self.__lbl_hid_interface_status_value.GetLabel(),
         )
         hbox.Add(self.__lbl_hid_interface_status_value, flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
 
+        # separator
         hbox.Add(wx.StaticText(panel, label="|"), flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)
 
+        # Audio interface
         lbl_audio_interface_status = wx.StaticText(panel, label="Audio Interface: ")
         self.__set_label_bold(lbl_audio_interface_status)
         hbox.Add(lbl_audio_interface_status, flag=wx.TOP | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL, border=5)
@@ -139,8 +146,9 @@ class View:
         self.__lbl_audio_interface_status_value = wx.StaticText(
             panel,
             label=MainGuiFrame.TEXT_UNAVAILABLE_NOT_CLAIMED,
-            style=wx.ALIGN_CENTER,
+            style=wx.ALIGN_LEFT,
         )
+        self.__lbl_audio_interface_status_value.SetMinSize(self.__lbl_audio_interface_status_value.GetBestSize())
         self.__apply_status_color(
             self.__lbl_audio_interface_status_value,
             self.__lbl_audio_interface_status_value.GetLabel(),
@@ -301,7 +309,7 @@ class Controller:
         self.__frame = frame
 
     def on_lookup(self, event):
-        g6_api = G6Api(dry_run=self.__model.get_dry_run(), debug=self.__model.get_debug())
+        g6_api = G6Api(dry_run=self.__model.is_dry_run(), debug=self.__model.is_debug())
         self.__model.set_g6_api(g6_api)
         self.update_availability()
 
