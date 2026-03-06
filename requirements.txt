@@ -1,5 +1,5 @@
 # soundblaster-x-g6-gui
 wxPython==4.2.3
-soundblaster-x-g6-cli==1.0.0a8
+soundblaster-x-g6-cli==1.0.0
 build==1.4.0
 twine==6.2.0
