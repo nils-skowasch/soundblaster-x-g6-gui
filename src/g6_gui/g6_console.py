@@ -28,6 +28,7 @@ class RedirectText:
         if self.__original_stream:
             self.__original_stream.flush()
 
-    # @staticmethod
-    # def isatty():
-    #     return False
+    # noinspection SpellCheckingInspection
+    @staticmethod
+    def isatty():
+        return False

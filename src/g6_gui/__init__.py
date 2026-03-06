@@ -12,7 +12,7 @@ from g6_gui.g6_tab_playback import PlaybackTab
 from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 
-VERSION = '1.0.0a3'
+VERSION = '1.0.0a4'
 
 
 class Model:
