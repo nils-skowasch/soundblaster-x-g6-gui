@@ -4,6 +4,7 @@ import wx
 
 from g6_cli import G6Api, AudioFeature, SmartVolumeSpecialHex
 from g6_gui.g6_models import AudioComponent, AudioComponentSmartVolume
+from g6_cli.g6_model.sbx import Profile
 
 
 class Model:
@@ -14,9 +15,24 @@ class Model:
         self.__bass = AudioComponent()
         self.__smart_volume = AudioComponentSmartVolume()
         self.__dialog_plus = AudioComponent()
+        self.__profile: Profile.Name | None = None
+        self.__profile_available = False  # HID
 
     def bind(self, view: "View"):
         self.__view = view
+
+    # --- selected profile ---
+
+    def get_profile(self) -> Profile.Name | None:
+        return self.__profile
+
+    def set_profile(self, profile_name: Profile.Name):
+        self.__profile = profile_name
+        self.__view.set_profile_toggle_selection(self.__profile)
+
+    def set_profiles_available(self, available: bool):
+        self.__profile_available = available
+        self.__view.set_profile_toggles_enabled(enabled=available)
 
     # --- surround ---
 
@@ -319,6 +335,7 @@ class View:
         self.__cmp_bass = None
         self.__cmp_smart_volume = None
         self.__cmp_dialog_plus = None
+        self.__profile_button_dict: dict[Profile.Name, wx.ToggleButton] = {}
 
     def bind(self, controller: "Controller"):
         self.__controller = controller
@@ -376,6 +393,30 @@ class View:
             lambda event: self.__controller.on_slide(audio_feature=AudioFeature.DIALOG_PLUS_SLIDER, event=event))
         vbox.Add(self.__cmp_dialog_plus, flag=flags, border=5)
 
+        ## SBX profiles
+        hbox_profiles = wx.BoxSizer(wx.HORIZONTAL)
+
+        # build __profile_button_dict
+        for profile_name in Profile.Name:
+            # Toggle buttons sized larger (like the original SoundBlaster Command Windows app)
+            # Images can be added here (uncomment/adjust paths when icon assets are available):
+            #   icon_path = f"icons/{profile_name.value.lower()}.png"
+            #   if os.path.exists(icon_path):
+            #       bmp = wx.Bitmap(icon_path)
+            #       btn.SetBitmap(bmp)          # wx.ToggleButton supports bitmap in wxPython 4+
+            btn = wx.ToggleButton(panel, label=profile_name.value, size=wx.Size(130, 65))
+            self.__profile_button_dict[profile_name] = btn
+
+            # Bind directly (lambda captures the profile enum)
+            btn.Bind(wx.EVT_TOGGLEBUTTON,
+                     lambda event, pn=profile_name: self.__controller.on_profile_selected(pn))
+
+            # Add button to hbox_profiles
+            hbox_profiles.Add(btn, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+
+        # Add hbox_profiles to vbox
+        vbox.Add(hbox_profiles, flag=flags, border=5)
+
         panel.SetSizer(vbox)
         return panel
 
@@ -386,6 +427,16 @@ class View:
         self.__cmp_bass.update_availability(g6_api=g6_api)
         self.__cmp_smart_volume.update_availability(g6_api=g6_api)
         self.__cmp_dialog_plus.update_availability(g6_api=g6_api)
+
+    def set_profile_toggle_selection(self, profile_name: Profile.Name):
+        """Visually select only the chosen profile button (mutually exclusive)."""
+        for button_profile_name, toggle_button in self.__profile_button_dict.items():
+            toggle_button.SetValue(button_profile_name == profile_name)
+
+    def set_profile_toggles_enabled(self, enabled: bool):
+        """Enable or disable the profile toggle buttons."""
+        for button_profile_name, toggle_button in self.__profile_button_dict.items():
+            toggle_button.Enable(enable=enabled)
 
     def get_surround_toggle_value(self) -> bool:
         return self.__cmp_surround.get_toggle_value()
@@ -533,6 +584,55 @@ class Controller:
         self.__model.set_crystalizer_available(available)
         self.__model.set_smart_volume_available(available)
         self.__model.set_dialog_plus_available(available)
+        self.__model.set_profiles_available(available)
+
+        # load the currently selected profile and sync UI with model
+        if self.__g6_api is not None:
+            current_profile = self.__g6_api.sbx_profile_selection()
+            if current_profile is None:
+                raise RuntimeError("Requested SBX profile from g6_api is None!")
+            self.__apply_profile(current_profile)
+
+    def on_profile_selected(self, profile_name: Profile.Name):
+        # update model
+        self.__apply_profile(profile_name)
+
+        # send profile switch to G6
+        if self.__g6_api is not None:
+            self.__g6_api.sbx_profile_switch(profile_name=profile_name)
+
+    def __apply_profile(self, profile_name: Profile.Name):
+        # request sbx model from g6_api
+        if self.__g6_api is None:
+            return
+        g6_model = self.__g6_api.get_model()
+        sbx = g6_model.get_sbx(profile_name=profile_name)
+
+        # update selected profile
+        self.__model.set_profile(profile_name)
+
+        # surround
+        self.__model.set_surround_active(sbx.get_surround_toggle())
+        self.__model.set_surround_value(sbx.get_surround_slider())
+        # crystalizer
+        self.__model.set_crystalizer_active(sbx.get_crystalizer_toggle())
+        self.__model.set_crystalizer_value(sbx.get_crystalizer_slider())
+        # bass
+        self.__model.set_bass_active(sbx.get_bass_toggle())
+        self.__model.set_bass_value(sbx.get_bass_slider())
+        # dialog plus
+        self.__model.set_dialog_plus_active(sbx.get_dialog_plus_toggle())
+        self.__model.set_dialog_plus_value(sbx.get_dialog_plus_slider())
+        # smart volume
+        self.__model.set_smart_volume_active(sbx.get_smart_volume_toggle())
+        special = sbx.get_smart_volume_special()
+        if special is None:
+            self.__model.set_smart_volume_value(sbx.get_smart_volume_slider())
+        else:
+            if special == SmartVolumeSpecialHex.SMART_VOLUME_NIGHT:
+                self.__model.set_smart_volume_night_mode()
+            elif special == SmartVolumeSpecialHex.SMART_VOLUME_LOUD:
+                self.__model.set_smart_volume_loud_mode()
 
     def on_toggle(self, audio_feature: AudioFeature, event):
         # get the toggle button and the button's state
@@ -569,7 +669,9 @@ class Controller:
         # send toggle command to G6
         if self.__g6_api is not None:
             # activate or deactivate audio feature on G6
-            self.__g6_api.sbx_toggle(audio_feature=audio_feature, activate=toggle_value)
+            self.__g6_api.sbx_toggle(profile_name=self.__model.get_profile(),
+                                     audio_feature=audio_feature,
+                                     activate=toggle_value)
             self.__on_slide(audio_feature=slider_audio_feature, value=slider_value)
 
     def on_slide(self, audio_feature: AudioFeature, event):
@@ -598,7 +700,9 @@ class Controller:
 
         # send slider value to G6
         if self.__g6_api is not None:
-            self.__g6_api.sbx_slider(audio_feature=audio_feature, value=value)
+            self.__g6_api.sbx_slider(profile_name=self.__model.get_profile(),
+                                     audio_feature=audio_feature,
+                                     value=value)
 
     def on_smart_volume_special(self, smart_volume_special_hex: SmartVolumeSpecialHex):
         # update model
@@ -614,7 +718,8 @@ class Controller:
 
         # send smart volume special command to G6
         if self.__g6_api is not None:
-            self.__g6_api.sbx_smart_volume_special(smart_volume_special_hex=smart_volume_special_hex)
+            self.__g6_api.sbx_smart_volume_special(profile_name=self.__model.get_profile(),
+                                                   smart_volume_special_hex=smart_volume_special_hex)
 
 
 class SbxTab:

@@ -4,6 +4,7 @@ import sys
 import wx
 
 from g6_cli import G6Api
+from g6_cli.g6_api import DEFAULT_MODEL_PATH
 from g6_gui.g6_console import RedirectText
 from g6_gui.g6_tab_decoder import DecoderTab
 from g6_gui.g6_tab_lighting import LightingTab
@@ -12,11 +13,11 @@ from g6_gui.g6_tab_playback import PlaybackTab
 from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 
-VERSION = '1.0.0'
+VERSION = '1.1.0a0'
 
 
 class Model:
-    def __init__(self, dry_run: bool, debug: bool):
+    def __init__(self, dry_run: bool, debug: bool, persist_model: bool):
         self.__view: View | None = None
         self.__g6_api: G6Api | None = None
         self.__g6_status: str = MainGuiFrame.TEXT_NOT_FOUND
@@ -24,6 +25,7 @@ class Model:
         self.__audio_interface_status: str = MainGuiFrame.TEXT_UNAVAILABLE_NOT_CLAIMED
         self.__dry_run = dry_run
         self.__debug = debug
+        self.__persist_model = persist_model
 
     def bind(self, view: "View"):
         self.__view = view
@@ -39,6 +41,9 @@ class Model:
 
     def is_debug(self) -> bool:
         return self.__debug
+
+    def is_persist_model(self) -> bool:
+        return self.__persist_model
 
     def set_g6_status(self, status: str):
         self.__g6_status = status
@@ -309,7 +314,8 @@ class Controller:
         self.__frame = frame
 
     def on_lookup(self, event):
-        g6_api = G6Api(dry_run=self.__model.is_dry_run(), debug=self.__model.is_debug())
+        g6_api = G6Api(dry_run=self.__model.is_dry_run(), debug=self.__model.is_debug(),
+                       persist_model=self.__model.is_persist_model())
         self.__model.set_g6_api(g6_api)
         self.update_availability()
 
@@ -377,14 +383,14 @@ class MainGuiFrame(wx.Frame):
     FRAME_SIZE_INITIAL = wx.Size(1024, 768)
     FRAME_SIZE_WITH_CONSOLE = wx.Size(FRAME_SIZE_INITIAL.width, FRAME_SIZE_INITIAL.height + 150)
 
-    def __init__(self, dry_run: bool, debug: bool):
+    def __init__(self, dry_run: bool, debug: bool, persist_model: bool):
         super().__init__(None, title="SoundBlaster X G6 - GUI", size=MainGuiFrame.FRAME_SIZE_INITIAL)
         self.SetMinSize(MainGuiFrame.FRAME_SIZE_INITIAL)
 
         self.panel_main = None
         self.__txt_console = None
 
-        self.__model = Model(dry_run=dry_run, debug=debug)
+        self.__model = Model(dry_run=dry_run, debug=debug, persist_model=persist_model)
         self.__view = View()
         self.__controller = Controller()
 
@@ -442,6 +448,8 @@ def parse_cli_args() -> argparse.Namespace:
                                        help='Used to verify the available hex_line files, without making any calls against the G6 device.')
     general_options_group.add_argument('--debug', required=False, action='store_true',
                                        help='Print communication data with the G6 device to the console.')
+    general_options_group.add_argument('--no-persist', required=False, action='store_true',
+                                       help=f"Disables reading and writing of the current G6 state in file '{DEFAULT_MODEL_PATH}'.")
     general_options_group.add_argument('--version', action='version', version=f'soundblaster-x-g6-gui {VERSION}')
 
     # parse args
@@ -454,6 +462,6 @@ def main():
     args = parse_cli_args()
 
     app = wx.App(False)
-    frame = MainGuiFrame(dry_run=args.dry_run, debug=args.debug)
+    frame = MainGuiFrame(dry_run=args.dry_run, debug=args.debug, persist_model=not args.no_persist)
     frame.open()
     app.MainLoop()

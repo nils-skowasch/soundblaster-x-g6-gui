@@ -197,7 +197,7 @@ venv/bin/python src/g6_gui.py
 ## GUI usage
 
 ```text
-usage: soundblaster-x-g6-gui [-h] [--dry-run] [--debug] [--version]
+usage: soundblaster-x-g6-gui [-h] [--dry-run] [--debug] [--no-persist] [--version]
 
 SoundBlaster X G6 GUI
 
@@ -208,6 +208,8 @@ General options:
   --dry-run   Used to verify the available hex_line files, without making any
               calls against the G6 device.
   --debug     Print communication data with the G6 device to the console.
+  --no-persist  Disables reading and writing of the current G6 state in file
+              '~/.soundblaster-x-g6/g6.json'.
   --version   show program's version number and exit
 ```
 
