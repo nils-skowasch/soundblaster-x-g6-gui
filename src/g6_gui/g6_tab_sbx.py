@@ -5,6 +5,7 @@ import wx
 from g6_cli import G6Api, AudioFeature, SmartVolumeSpecialHex
 from g6_cli.g6_model.sbx import Profile
 from g6_gui.g6_models import AudioComponent, AudioComponentSmartVolume
+from g6_gui.g6_util import read_png_from_file
 
 
 class Model:
@@ -430,27 +431,30 @@ class View:
 
         ## SBX profiles
         hbox_profiles = wx.BoxSizer(wx.HORIZONTAL)
-
-        # build __profile_button_dict
+        hbox_profiles.Add(wx.StaticText(panel), proportion=1)
+        icon_width = 150
         for profile_name in Profile.Name:
-            # Toggle buttons sized larger (like the original SoundBlaster Command Windows app)
-            # Images can be added here (uncomment/adjust paths when icon assets are available):
-            #   icon_path = f"icons/{profile_name.value.lower()}.png"
-            #   if os.path.exists(icon_path):
-            #       bmp = wx.Bitmap(icon_path)
-            #       btn.SetBitmap(bmp)          # wx.ToggleButton supports bitmap in wxPython 4+
-            btn = wx.ToggleButton(panel, label=profile_name.value, size=wx.Size(130, 65))
+            # Create button
+            btn = wx.ToggleButton(panel, size=wx.Size(158, 158))
             self.__profile_button_dict[profile_name] = btn
-
-            # Bind directly (lambda captures the profile enum)
+            # Add icon to button
+            btn.SetBitmap(
+                bitmap=wx.BitmapBundle(read_png_from_file(
+                    file_name=f"profile_button_{profile_name.value.lower()}_{icon_width}.png",
+                    expected_width=icon_width)
+                ),
+                dir=wx.TOP
+            )
+            # Add click event handler
             btn.Bind(wx.EVT_TOGGLEBUTTON,
                      lambda event, pn=profile_name: self.__controller.on_profile_selected(pn))
-
             # Add button to hbox_profiles
-            hbox_profiles.Add(btn, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+            hbox_profiles.Add(btn, proportion=0, flag=wx.ALL, border=5)
+        hbox_profiles.Add(wx.StaticText(panel), proportion=1)
 
         # Add hbox_profiles to vbox
-        vbox.Add(hbox_profiles, flag=flags, border=5)
+        vbox.Add(wx.StaticLine(panel), flag=flags, border=5)
+        vbox.Add(hbox_profiles, proportion=1, flag=flags, border=5)
 
         panel.SetSizer(vbox)
         return panel

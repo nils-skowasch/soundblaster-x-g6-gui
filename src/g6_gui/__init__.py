@@ -12,6 +12,7 @@ from g6_gui.g6_tab_mixer import MixerTab
 from g6_gui.g6_tab_playback import PlaybackTab
 from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
+from g6_gui.g6_util import read_png_from_file
 
 VERSION = '1.1.0a0'
 
@@ -167,25 +168,42 @@ class View:
         return panel
 
     def __create_notebook(self, parent: wx.Panel) -> wx.Notebook:
+
+        icon_width = 24
+        image_list = wx.ImageList(width=icon_width, height=icon_width, initialCount=6)
+        sbx_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_sbx_{icon_width}.png", expected_width=icon_width))
+        playback_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_playback_{icon_width}.png", expected_width=icon_width))
+        recording_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_recording_{icon_width}.png", expected_width=icon_width))
+        decoder_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_decoder_{icon_width}.png", expected_width=icon_width))
+        mixer_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_mixer_{icon_width}.png", expected_width=icon_width))
+        lighting_image_id = image_list.Add(bitmap=read_png_from_file(
+            file_name=f"notebook_lighting_{icon_width}.png", expected_width=icon_width))
+
         notebook = wx.Notebook(parent)
+        notebook.SetImageList(image_list)
 
         self.__tab_sbx = SbxTab()
-        notebook.AddPage(self.__tab_sbx.create(notebook), 'SBX-Profile')
+        notebook.AddPage(page=self.__tab_sbx.create(notebook), text=' SBX-Profile', imageId=sbx_image_id)
 
         self.__tab_playback = PlaybackTab()
-        notebook.AddPage(self.__tab_playback.create(notebook), "Playback")
+        notebook.AddPage(page=self.__tab_playback.create(notebook), text=" Playback", imageId=playback_image_id)
 
         self.__tab_recording = RecordingTab()
-        notebook.AddPage(self.__tab_recording.create(notebook), "Recording")
+        notebook.AddPage(page=self.__tab_recording.create(notebook), text=" Recording", imageId=recording_image_id)
 
         self.__tab_decoder = DecoderTab()
-        notebook.AddPage(self.__tab_decoder.create(notebook), "Decoder")
+        notebook.AddPage(page=self.__tab_decoder.create(notebook), text="Decoder", imageId=decoder_image_id)
 
         self.__tab_mixer = MixerTab(self.__frame)
-        notebook.AddPage(self.__tab_mixer.create(notebook), "Mixer")
+        notebook.AddPage(page=self.__tab_mixer.create(notebook), text=" Mixer", imageId=mixer_image_id)
 
         self.__tab_lighting = LightingTab()
-        notebook.AddPage(self.__tab_lighting.create(notebook), "Lighting")
+        notebook.AddPage(page=self.__tab_lighting.create(notebook), text=" Lighting", imageId=lighting_image_id)
 
         return notebook
 
