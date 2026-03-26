@@ -3,8 +3,8 @@ from collections.abc import Callable
 import wx
 
 from g6_cli import G6Api, AudioFeature, SmartVolumeSpecialHex
-from g6_gui.g6_models import AudioComponent, AudioComponentSmartVolume
 from g6_cli.g6_model.sbx import Profile
+from g6_gui.g6_models import AudioComponent, AudioComponentSmartVolume
 
 
 class Model:
@@ -203,14 +203,49 @@ class Model:
 class View:
     class SliderComposite(wx.BoxSizer):
         def __init__(self, parent: wx.Panel, label: str):
+            def __update_slider_tooltip():
+                # update tooltip
+                tooltip_text = str(self.__slider.GetValue())
+                tooltip = self.__slider.GetToolTip()
+                if tooltip is None:
+                    tooltip = wx.ToolTip(tooltip_text)
+                    self.__slider.SetToolTip(tooltip)
+                else:
+                    tooltip.SetTip(tooltip_text)
+
+            def __enter_window_event_handler(event: wx.CommandEvent):
+                # update the sliders tooltip
+                __update_slider_tooltip()
+
+            def __scroll_changed_event_handler(event: wx.CommandEvent):
+                # update the sliders tooltip
+                __update_slider_tooltip()
+
+                # execute registered callback function
+                if self.__slider_on_slide_callable is not None:
+                    self.__slider_on_slide_callable(event)
+
+            def __on_toggle_event_handler(event: wx.CommandEvent):
+                # execute registered callback function
+                if self.__toggle_on_toggle_callable is not None:
+                    self.__toggle_on_toggle_callable(event)
+
             super().__init__(wx.HORIZONTAL)
 
             # create components
             self.__label = wx.StaticText(parent, label=label)
             self.__vbox_slider = wx.BoxSizer(wx.VERTICAL)
+
             self.__slider = wx.Slider(parent, minValue=0, maxValue=100, value=50, style=wx.SL_HORIZONTAL)
+            self.__slider.Bind(wx.EVT_ENTER_WINDOW, __enter_window_event_handler)
+            self.__slider.Bind(wx.EVT_SCROLL_CHANGED, __scroll_changed_event_handler)
+            self.__slider_on_slide_callable: Callable[[wx.CommandEvent], None] | None = None
+
             self.__special_button_list = self.add_special_buttons(parent)
+
             self.__toggle = wx.ToggleButton(parent, label="Disabled")
+            self.__toggle.Bind(wx.EVT_TOGGLEBUTTON, __on_toggle_event_handler)
+            self.__toggle_on_toggle_callable: Callable[[wx.CommandEvent], None] | None = None
 
             # label
             self.Add(self.__label, proportion=1, flag=wx.ALL | wx.ALIGN_CENTER_VERTICAL, border=5)
@@ -248,11 +283,11 @@ class View:
             """
             return []
 
-        def bind_toggle_event(self, handler: Callable[[wx.CommandEvent], None]) -> None:
-            self.__toggle.Bind(wx.EVT_TOGGLEBUTTON, handler)
+        def register_on_slide_callable(self, function: Callable[[wx.CommandEvent], None]) -> None:
+            self.__slider_on_slide_callable = function
 
-        def bind_slider_event(self, handler: Callable[[wx.CommandEvent], None]) -> None:
-            self.__slider.Bind(wx.EVT_SCROLL_CHANGED, handler)
+        def register_on_toggle_callable(self, function: Callable[[wx.CommandEvent], None]) -> None:
+            self.__toggle_on_toggle_callable = function
 
         def update_availability(self, g6_api: G6Api | None):
             toggle_value = self.get_toggle_value()
@@ -349,35 +384,35 @@ class View:
 
         ## surround
         self.__cmp_surround = View.SliderComposite(panel, "Surround")
-        self.__cmp_surround.bind_toggle_event(
+        self.__cmp_surround.register_on_toggle_callable(
             lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.SURROUND_TOGGLE,
                                                       event=event))
-        self.__cmp_surround.bind_slider_event(
+        self.__cmp_surround.register_on_slide_callable(
             lambda event: self.__controller.on_slide(audio_feature=AudioFeature.SURROUND_SLIDER, event=event))
         vbox.Add(self.__cmp_surround, flag=flags, border=5)
 
         ## crystalizer
         self.__cmp_crystalizer = View.SliderComposite(panel, "Crystalizer")
-        self.__cmp_crystalizer.bind_toggle_event(
+        self.__cmp_crystalizer.register_on_toggle_callable(
             lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.CRYSTALIZER_TOGGLE, event=event))
-        self.__cmp_crystalizer.bind_slider_event(
+        self.__cmp_crystalizer.register_on_slide_callable(
             lambda event: self.__controller.on_slide(audio_feature=AudioFeature.CRYSTALIZER_SLIDER, event=event))
         vbox.Add(self.__cmp_crystalizer, flag=flags, border=5)
 
         ## bass
         self.__cmp_bass = View.SliderComposite(panel, "Bass")
-        self.__cmp_bass.bind_toggle_event(
+        self.__cmp_bass.register_on_toggle_callable(
             lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.BASS_TOGGLE, event=event))
-        self.__cmp_bass.bind_slider_event(lambda event: self.__controller.on_slide(
+        self.__cmp_bass.register_on_slide_callable(lambda event: self.__controller.on_slide(
             audio_feature=AudioFeature.BASS_SLIDER, event=event))
         vbox.Add(self.__cmp_bass, flag=flags, border=5)
 
         ## smart volume
         self.__cmp_smart_volume = View.SmartVolumeSpecialComposite(panel, "Smart Volume")
-        self.__cmp_smart_volume.bind_toggle_event(
+        self.__cmp_smart_volume.register_on_toggle_callable(
             lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.SMART_VOLUME_TOGGLE,
                                                       event=event))
-        self.__cmp_smart_volume.bind_slider_event(
+        self.__cmp_smart_volume.register_on_slide_callable(
             lambda event: self.__controller.on_slide(audio_feature=AudioFeature.SMART_VOLUME_SLIDER, event=event))
         self.__cmp_smart_volume.bind_night_button_event(lambda event: self.__controller.on_smart_volume_special(
             smart_volume_special_hex=SmartVolumeSpecialHex.SMART_VOLUME_NIGHT))
@@ -387,9 +422,9 @@ class View:
 
         ## dialog plus
         self.__cmp_dialog_plus = View.SliderComposite(panel, "Dialog Plus")
-        self.__cmp_dialog_plus.bind_toggle_event(
+        self.__cmp_dialog_plus.register_on_toggle_callable(
             lambda event: self.__controller.on_toggle(audio_feature=AudioFeature.DIALOG_PLUS_TOGGLE, event=event))
-        self.__cmp_dialog_plus.bind_slider_event(
+        self.__cmp_dialog_plus.register_on_slide_callable(
             lambda event: self.__controller.on_slide(audio_feature=AudioFeature.DIALOG_PLUS_SLIDER, event=event))
         vbox.Add(self.__cmp_dialog_plus, flag=flags, border=5)
 
