@@ -1,4 +1,5 @@
 from enum import Enum
+from g6_cli.g6_model.playback import AudioMode as ApiModelAudioMode
 
 
 class AudioComponent:
@@ -45,6 +46,18 @@ class AudioMode(Enum):
     STEREO = 0
     VIRTUAL_SURROUND_5_1 = 1
     VIRTUAL_SURROUND_7_1 = 2
+
+    @staticmethod
+    def from_api_audio_mode(audio_mode: ApiModelAudioMode) -> "AudioMode":
+        match audio_mode:
+            case ApiModelAudioMode.AM_STEREO:
+                return AudioMode.STEREO
+            case ApiModelAudioMode.AM_5_1:
+                return AudioMode.VIRTUAL_SURROUND_5_1
+            case ApiModelAudioMode.AM_7_1:
+                return AudioMode.VIRTUAL_SURROUND_7_1
+            case _:
+                raise ValueError(f"Unexpected audio_mode: {audio_mode}!")
 
 
 class AudioOutput(Enum):

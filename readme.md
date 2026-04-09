@@ -63,20 +63,25 @@ Apply the udev rules by issuing:
 sudo udevadm trigger
 ```
 
-### Linux: Create sudoers entry for reloading ALSA
+### Linux: configure /etc/asound.conf
 
-To use the application with the `--reload-audio-services` option (if applicable, though primarily used by the CLI
-backend), you may need to add the following line to your sudoers file:
+Configure `/etc/asound.conf` to let ALSA reliably detect the G6 device on reload:
 
-```shell
-# Add sudoers entry:
-sudo cat > /etc/sudoers.d/50-soundblaster-x-g6 << EOF
-<username> ALL=(ALL:ALL) NOPASSWD: /usr/sbin/alsa force-reload
-EOF
+```text
+# Force ALSA to always use the Sound BlasterX G6 by its card name (not index)
+# The name "G6" is fixed by the driver and never changes even if the kernel
+# reassigns card numbers because of other USB devices.
+
+pcm.!default {
+    type hw
+    card G6
+}
+
+ctl.!default {
+    type hw
+    card G6
+}
 ```
-
-Replace `<username>` with your actual username. This allows the application (on your behalf) to reload the ALSA services
-without entering your password.
 
 ### Linux: Install libusb1
 

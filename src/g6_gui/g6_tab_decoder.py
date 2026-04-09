@@ -114,6 +114,19 @@ class Controller:
 
         self.__model.set_decoder_mode_available(decoder_mode_available)
 
+        # load the last set values from the persisted model file
+        if self.__g6_api is not None:
+            self.__apply_api_model()
+
+    def __apply_api_model(self):
+        # load decoder data from api model
+        if self.__g6_api is None:
+            return
+        decoder = self.__g6_api.get_model().get_decoder()
+
+        # update ui model
+        self.__model.set_decoder_mode(decoder.get_mode())
+
     def on_select_decoder_mode(self, mode: DecoderMode) -> None:
         # update model
         self.__model.set_decoder_mode(mode)

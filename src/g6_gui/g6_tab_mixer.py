@@ -857,6 +857,47 @@ class Controller:
         self.__model.set_recording_spdif_in_available(recording_spdif_in_available)
         self.__model.set_recording_what_u_hear_available(recording_what_u_hear_available)
 
+        # load the last set values from the persisted model file
+        if self.__g6_api is not None:
+            self.__apply_api_model()
+
+    def __apply_api_model(self):
+        # load mixer data from api model
+        if self.__g6_api is None:
+            return
+        playback = self.__g6_api.get_model().get_playback()
+        mixer = self.__g6_api.get_model().get_mixer()
+
+        # update ui model
+        ## playback
+        self.__model.set_playback_active(not mixer.get_playback_mute())
+        self.__model.set_playback_volume(playback.get_volume(channel=Channel.CHANNEL_1))
+
+        ## monitoring
+        self.__model.set_monitoring_line_in_active(not mixer.get_monitoring_line_in_mute())
+        self.__model.set_monitoring_line_in_volume(mixer.get_monitoring_line_in_volume(channel=Channel.CHANNEL_1))
+
+        self.__model.set_monitoring_external_mic_active(not mixer.get_monitoring_external_mic_mute())
+        self.__model.set_monitoring_external_mic_volume(
+            mixer.get_monitoring_external_mic_volume(channel=Channel.CHANNEL_1))
+
+        self.__model.set_monitoring_spdif_in_active(not mixer.get_monitoring_spdif_in_mute())
+        self.__model.set_monitoring_spdif_in_volume(mixer.get_monitoring_spdif_in_volume(channel=Channel.CHANNEL_1))
+
+        ## recording
+        self.__model.set_recording_external_mic_active(not mixer.get_recording_external_mic_mute())
+        self.__model.set_recording_external_mic_volume(
+            mixer.get_recording_external_mic_volume(channel=Channel.CHANNEL_1))
+
+        self.__model.set_recording_line_in_active(not mixer.get_recording_line_in_mute())
+        self.__model.set_recording_line_in_volume(mixer.get_recording_line_in_volume(channel=Channel.CHANNEL_1))
+
+        self.__model.set_recording_spdif_in_active(not mixer.get_recording_spdif_in_mute())
+        self.__model.set_recording_spdif_in_volume(mixer.get_recording_spdif_in_volume(channel=Channel.CHANNEL_1))
+
+        self.__model.set_recording_what_u_hear_active(not mixer.get_recording_what_u_hear_mute())
+        self.__model.set_recording_what_u_hear_volume(mixer.get_recording_what_u_hear_volume(channel=Channel.CHANNEL_1))
+
     # --- playback (speakers) ---
 
     def on_toggle_playback(self, event) -> None:

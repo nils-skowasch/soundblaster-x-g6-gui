@@ -172,6 +172,20 @@ class Controller:
 
         self.__model.set_lighting_available(lighting_available)
 
+        # load the currently selected profile and sync UI with model
+        if self.__g6_api is not None:
+            self.__apply_api_model()
+
+    def __apply_api_model(self):
+        # load lighting data from api model
+        if self.__g6_api is None:
+            return
+        lighting = self.__g6_api.get_model().get_lighting()
+
+        # update ui model
+        self.__model.set_lighting_enabled(lighting.get_enabled())
+        self.__model.set_rgb(red=lighting.get_rgb()[0], green=lighting.get_rgb()[1], blue=lighting.get_rgb()[2])
+
     def on_color_changed(self, event) -> None:
         # get color from color picker
         color = event.GetColour()

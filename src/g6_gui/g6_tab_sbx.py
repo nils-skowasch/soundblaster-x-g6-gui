@@ -627,41 +627,38 @@ class Controller:
 
         # load the currently selected profile and sync UI with model
         if self.__g6_api is not None:
-            current_profile = self.__g6_api.sbx_profile_selection()
-            if current_profile is None:
-                raise RuntimeError("Requested SBX profile from g6_api is None!")
-            self.__apply_profile(current_profile)
+            self.__apply_api_model()
 
-    def on_profile_selected(self, profile_name: Profile.Name):
-        # update model
-        self.__apply_profile(profile_name)
+    def __apply_api_model(self):
+        current_profile = self.__g6_api.get_model().get_sbx_profile_selection()
+        if current_profile is None:
+            raise RuntimeError("Requested SBX profile from g6_api is None!")
 
-        # send profile switch to G6
-        if self.__g6_api is not None:
-            self.__g6_api.sbx_profile_switch(profile_name=profile_name)
-
-    def __apply_profile(self, profile_name: Profile.Name):
         # request sbx model from g6_api
         if self.__g6_api is None:
             return
         g6_model = self.__g6_api.get_model()
-        sbx = g6_model.get_sbx(profile_name=profile_name)
+        sbx = g6_model.get_sbx(profile_name=current_profile)
 
         # update selected profile
-        self.__model.set_profile(profile_name)
+        self.__model.set_profile(current_profile)
 
         # surround
         self.__model.set_surround_active(sbx.get_surround_toggle())
         self.__model.set_surround_value(sbx.get_surround_slider())
+
         # crystalizer
         self.__model.set_crystalizer_active(sbx.get_crystalizer_toggle())
         self.__model.set_crystalizer_value(sbx.get_crystalizer_slider())
+
         # bass
         self.__model.set_bass_active(sbx.get_bass_toggle())
         self.__model.set_bass_value(sbx.get_bass_slider())
+
         # dialog plus
         self.__model.set_dialog_plus_active(sbx.get_dialog_plus_toggle())
         self.__model.set_dialog_plus_value(sbx.get_dialog_plus_slider())
+
         # smart volume
         self.__model.set_smart_volume_active(sbx.get_smart_volume_toggle())
         special = sbx.get_smart_volume_special()
@@ -672,6 +669,14 @@ class Controller:
                 self.__model.set_smart_volume_night_mode()
             elif special == SmartVolumeSpecialHex.SMART_VOLUME_LOUD:
                 self.__model.set_smart_volume_loud_mode()
+
+    def on_profile_selected(self, profile_name: Profile.Name):
+        # send profile switch to G6 and update model
+        if self.__g6_api is not None:
+            self.__g6_api.sbx_profile_switch(profile_name=profile_name)
+
+        # apply api model in UI
+        self.__apply_api_model()
 
     def on_toggle(self, audio_feature: AudioFeature, event):
         # get the toggle button and the button's state

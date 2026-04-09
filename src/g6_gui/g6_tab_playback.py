@@ -372,6 +372,36 @@ class Controller:
         self.__model.set_spdif_out_direct_mode_available(spdif_out_direct_mode_available)
         self.__model.set_filter_available(filter_available)
 
+        # load the last set values from the persisted model file
+        if self.__g6_api is not None:
+            self.__apply_api_model()
+
+    def __apply_api_model(self):
+        # load playback data from api model
+        if self.__g6_api is None:
+            return
+        playback = self.__g6_api.get_model().get_playback()
+
+        # update ui model
+        ## playback source
+        if playback.get_is_speakers():
+            self.__model.set_speakers_selected()
+        else:
+            self.__model.set_headphones_selected()
+        self.__model.set_speakers_audio_mode(
+            AudioMode.from_api_audio_mode(audio_mode=playback.get_speakers_audio_mode()))
+        self.__model.set_headphones_audio_mode(
+            AudioMode.from_api_audio_mode(audio_mode=playback.get_headphones_audio_mode()))
+
+        ## directmode
+        self.__model.set_direct_mode_active(playback.get_direct_mode_enabled())
+
+        ## spdif directmode
+        self.__model.set_spdif_out_direct_mode_active(playback.get_spdif_out_direct_mode_enabled())
+
+        ## filter
+        self.__model.set_filter(playback.get_filter())
+
     def on_select_audio_output(self, audio_output: AudioOutput) -> None:
         match audio_output:
             case AudioOutput.SPEAKERS:

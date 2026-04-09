@@ -10,10 +10,10 @@ build-backend = "setuptools.build_meta"
 #
 [project]
 name = "soundblaster-x-g6-gui"
-version = "1.1.0a0"
+version = "1.1.0a3"
 #
 dependencies = [
-    "soundblaster-x-g6-cli==1.1.0a1",
+    "soundblaster-x-g6-cli==1.1.0a5",
     "wxPython==4.2.3"
 ]
 requires-python = ">=3.12"
@@ -45,13 +45,16 @@ Repository = "https://github.com/nils-skowasch/soundblaster-x-g6-gui"
 soundblaster-x-g6-gui = "g6_gui:main"
 
 #
-# Tool: package-dir
+# Tool: setuptools
+#
+[tool.setuptools]
+include-package-data = true # explicitly import data files
 #
 [tool.setuptools.package-dir]
 "" = "src"
-
 #
-# Tool: find
+[tool.setuptools.package-data]
+"g6_gui" = ["icons/*"]
 #
 [tool.setuptools.packages.find]
 where = ["src"]

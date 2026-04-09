@@ -14,7 +14,7 @@ from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 from g6_gui.g6_util import read_png_from_file
 
-VERSION = '1.1.0a0'
+VERSION = '1.1.0a3'
 
 
 class Model:
@@ -230,12 +230,12 @@ class View:
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
         btn_release.Bind(wx.EVT_BUTTON, lambda event: self.__controller.on_release(event))
 
-        btn_reload_alsa_and_pipewire = wx.Button(panel_footer, label="4. Reload ALSA and PipeWire")
+        btn_reload_audio_services = wx.Button(panel_footer, label="4. Reload Audio Services")
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
-        hbox_footer.Add(btn_reload_alsa_and_pipewire, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
+        hbox_footer.Add(btn_reload_audio_services, flag=wx.ALL | wx.ALIGN_CENTER, border=5, proportion=1)
         hbox_footer.Add(wx.StaticText(panel_footer, label=""), proportion=5)
-        btn_reload_alsa_and_pipewire.Bind(wx.EVT_BUTTON,
-                                          lambda event: self.__controller.on_reload_alsa_and_pipewire(event))
+        btn_reload_audio_services.Bind(wx.EVT_BUTTON,
+                                       lambda event: self.__controller.on_reload_audio_services(event))
 
         return panel_footer
 
@@ -349,10 +349,10 @@ class Controller:
             g6_api.release_audio_interface()
             self.update_availability()
 
-    def on_reload_alsa_and_pipewire(self, event):
+    def on_reload_audio_services(self, event):
         g6_api = self.__model.get_g6_api()
         if g6_api:
-            g6_api.reload_alsa_and_pipewire()
+            g6_api.reload_audio()
 
     def on_toggle_console(self, event):
         if self.__view.is_console_shown():
