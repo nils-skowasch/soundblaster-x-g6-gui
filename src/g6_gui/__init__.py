@@ -14,7 +14,7 @@ from g6_gui.g6_tab_recording import RecordingTab
 from g6_gui.g6_tab_sbx import SbxTab
 from g6_gui.g6_util import read_png_from_file
 
-VERSION = '1.1.0a3'
+VERSION = '1.1.0a4'
 
 
 class Model:

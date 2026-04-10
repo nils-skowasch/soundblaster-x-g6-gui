@@ -63,7 +63,7 @@ Apply the udev rules by issuing:
 sudo udevadm trigger
 ```
 
-### Linux: configure /etc/asound.conf
+### Configure /etc/asound.conf
 
 Configure `/etc/asound.conf` to let ALSA reliably detect the G6 device on reload:
 
@@ -83,7 +83,7 @@ ctl.!default {
 }
 ```
 
-### Linux: Install libusb1
+### Install libusb1
 
 The following libusb packages are required:
 
@@ -95,14 +95,6 @@ libusb-1.0-0/jammy-updates,now 2:1.0.25-1ubuntu2 amd64 [installed]
 ```shell
 sudo apt-get -y install libusb-1.0-0-dev libusb-1.0-0 
 ```
-
-### Windows: Add libusb-1.0.dll to %PATH%
-
-Download the package [libusb](https://pypi.org/project/libusb/#files) from Pypi (version `1.0.27`) and add the
-following DLL file to your `%PATH%` variable:
-`/libusb-1.0.27/src/libusb/_platform/_windows/x64/libusb-1.0.dll`
-
-This is required to let the application use libusb in the backend.
 
 ## Installation
 

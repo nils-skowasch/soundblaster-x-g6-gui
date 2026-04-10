@@ -10,11 +10,11 @@ build-backend = "setuptools.build_meta"
 #
 [project]
 name = "soundblaster-x-g6-gui"
-version = "1.1.0a3"
+version = "1.1.0a4"
 #
 dependencies = [
-    "soundblaster-x-g6-cli==1.1.0a5",
-    "wxPython==4.2.3"
+    "soundblaster-x-g6-cli==1.1.0a6",
+    "wxPython==4.2.5"
 ]
 requires-python = ">=3.12"
 #
