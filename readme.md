@@ -37,7 +37,7 @@ in Windows by using a [QEMU/KVM VM](https://virt-manager.org/) and the USB Redir
 
 ## System requirements
 
-### Linux: Create udev-rule
+### Create udev-rule
 
 In `/etc/udev/rules.d/` create a rule file as root (e.q. with name `50-soundblaster-x-g6.rules`) having the
 following content:
